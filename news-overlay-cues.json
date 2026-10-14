@@ -1,0 +1,111 @@
+[
+  {
+    "id": "278b4c751e0b4d04914bbcd42eaeb886",
+    "name": "SAKAJA",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "sakaja",
+      "supportingLines": [
+        "Your supporting line stays on screen"
+      ]
+    },
+    "savedAt": "2026-10-14T19:13:58.790236+00:00"
+  },
+  {
+    "id": "1d6377fe2add4779a6130026c63b67a5",
+    "name": "this is another example of headline",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "this is another example of headline",
+      "supportingLines": [
+        "Your supporting line stays on screen"
+      ]
+    },
+    "savedAt": "2026-10-14T19:25:56.844451+00:00"
+  },
+  {
+    "id": "f5ac48733d084f679f7b2edc703f09d8",
+    "name": "SAKAJA",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "I can Change color and add logo",
+      "supportingLines": [
+        "Your supporting line stays on screen"
+      ]
+    },
+    "savedAt": "2026-10-14T19:28:27.989593+00:00"
+  },
+  {
+    "id": "c711bbddf7fb45688303f370d8b2c068",
+    "name": "headline 2",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "sakaja",
+      "supportingLines": [
+        "Your supporting line stays on screen"
+      ]
+    },
+    "savedAt": "2026-10-14T19:42:53.384865+00:00"
+  },
+  {
+    "id": "2bd8599c45e54867adabef666d4afedc",
+    "name": "this is another example of headline-b",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "this is another example of headline",
+      "supportingLines": [
+        "Your supporting line stays on screen"
+      ]
+    },
+    "savedAt": "2026-10-14T19:57:48.225568+00:00"
+  },
+  {
+    "id": "4f393bdefafa442cb99b0d71eec6d376",
+    "name": "NEW TEST",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "I can Change color and add logo"
+    },
+    "savedAt": "2026-10-14T20:10:28.710551+00:00"
+  },
+  {
+    "id": "2c9130bcbd31427e81dbc262005810ba",
+    "name": "NEW TEST",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "I can Change color and add logo",
+      "supportingLines": [
+        "second line"
+      ],
+      "supportingInterval": 7
+    },
+    "savedAt": "2026-10-14T20:27:35.466775+00:00"
+  },
+  {
+    "id": "68bf6aad791b44339cae40d44d5020fc",
+    "name": "NEW TEST",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "I can Change color and add logo",
+      "supportingLines": [
+        "second line"
+      ],
+      "supportingInterval": 7
+    },
+    "savedAt": "2026-10-14T20:27:37.367840+00:00"
+  },
+  {
+    "id": "feb4a1ffaac54a3981d316bae4aa9e6e",
+    "name": "new test",
+    "settings": {
+      "label": "BREAKING NEWS",
+      "headline": "I can Change color and add logo",
+      "supportingLines": [
+        "This is a single supporting line",
+        "Second supporting line"
+      ],
+      "supportingInterval": 5
+    },
+    "savedAt": "2026-10-14T21:37:00.601991+00:00"
+  }
+]

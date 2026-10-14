@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1080p News Lower Third</title>
+  <style>
+    :root {
+      --accent: #c90013;
+      --accent-dark: #87000c;
+      --panel-light: #ffffff;
+      --panel-dark: #b6b9bc;
+      --headline-color: #292a2d;
+      --subtitle-color: #616367;
+      --ticker-color: #ffffff;
+      --logo-bg: #38393d;
+      --side-inset: 48px;
+      --bottom-offset: 54px;
+      --corner-top: 42px;
+      --corner-left: 48px;
+      --ink: #202124;
+      --scale: 1;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: transparent; }
+    body { font-family: "Bahnschrift", "Segoe UI", sans-serif; }
+
+    /* The stage scales as one 1920 × 1080 composition in any OBS browser size. */
+    #stage {
+      position: absolute;
+      width: 1920px;
+      height: 1080px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(var(--scale));
+      transform-origin: center center;
+      pointer-events: none;
+    }
+
+    .live-corner {
+      position: absolute;
+      left: var(--corner-left);
+      top: var(--corner-top);
+      min-width: 216px;
+      filter: drop-shadow(0 3px 8px rgba(0,0,0,.45));
+      animation: corner-in .65s cubic-bezier(.2,.75,.2,1) both;
+    }
+    .live-label {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: fit-content;
+      height: 43px;
+      padding: 0 17px 0 14px;
+      background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+      color: white;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      line-height: 1;
+      box-shadow: inset 0 1px rgba(255,255,255,.28);
+    }
+    .live-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(255,255,255,.18);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .clock-row { display: flex; height: 48px; width: fit-content; }
+    .clock {
+      display: flex;
+      align-items: center;
+      min-width: 170px;
+      padding: 0 12px;
+      background: rgba(250,250,250,.97);
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -.035em;
+      line-height: 1;
+    }
+    .clock-zone {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      background: #202124;
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .05em;
+    }
+
+    .lower-third {
+      position: absolute;
+      left: var(--side-inset);
+      right: var(--side-inset);
+      bottom: var(--bottom-offset);
+      height: 200px;
+      filter: drop-shadow(0 8px 14px rgba(0,0,0,.48));
+      animation: panel-in .9s cubic-bezier(.17,.76,.22,1) both;
+    }
+    .top-rule {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 17px;
+      height: 3px;
+      background: rgba(255,255,255,.82);
+    }
+    .main-panel {
+      position: absolute;
+      inset: 20px 0 39px;
+      display: flex;
+      overflow: hidden;
+      background: linear-gradient(105deg, var(--panel-light), var(--panel-dark));
+      border-left: 13px solid var(--accent);
+      box-shadow: inset 0 1px rgba(255,255,255,.95), inset 0 -1px rgba(0,0,0,.14);
+    }
+    .copy {
+      position: relative;
+      min-width: 0;
+      flex: 1;
+      padding: 31px 36px 12px 34px;
+      overflow: hidden;
+    }
+    .headline-frame { position: relative; height: 59px; overflow: hidden; }
+    .headline {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--headline-color);
+      font-size: 57px;
+      font-weight: 800;
+      line-height: .98;
+      letter-spacing: -.025em;
+      text-transform: uppercase;
+      animation: copy-in .55s .45s both;
+    }
+    .headline-ghost, .subtitle-ghost { z-index: 2; pointer-events: none; }
+    .copy::after {
+      content: "";
+      position: absolute;
+      z-index: 4;
+      top: 23px;
+      bottom: 17px;
+      left: 30px;
+      right: 27px;
+      background: linear-gradient(90deg, var(--accent-dark), var(--accent) 85%, #ffffff);
+      transform: translateX(-105%);
+      pointer-events: none;
+    }
+    .copy.is-transitioning::after { animation: headline-wipe 1.65s cubic-bezier(.4,0,.2,1) both; }
+    .subtitle-frame { position: relative; height: 29px; margin-top: 8px; overflow: hidden; }
+    .subtitle {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--subtitle-color);
+      font-size: 25px;
+      font-weight: 500;
+      line-height: 1.1;
+      animation: copy-in .55s .6s both;
+    }
+    .logo-box {
+      position: relative;
+      flex: 0 0 244px;
+      display: grid;
+      place-items: center;
+      border-left: 1px solid rgba(0,0,0,.22);
+      background: linear-gradient(145deg, var(--logo-bg), #18191d);
+      box-shadow: inset 6px 0 12px rgba(0,0,0,.16);
+      overflow: hidden;
+    }
+    .logo-box::before {
+      content: "";
+      position: absolute;
+      width: 225px;
+      height: 225px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 50%;
+    }
+    .logo-placeholder {
+      position: relative;
+      color: #f2f2f2;
+      font-size: 27px;
+      font-weight: 800;
+      line-height: .9;
+      letter-spacing: .06em;
+      text-align: center;
+    }
+    .logo-placeholder span { color: var(--accent); }
+    .logo-image { display: none; position: relative; max-width: 88%; max-height: 82%; object-fit: contain; }
+    .logo-box.has-logo .logo-image { display: block; }
+    .logo-box.has-logo .logo-placeholder { display: none; }
+
+    .breaking-label {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 2;
+      height: 42px;
+      min-width: 251px;
+      display: flex;
+      align-items: center;
+      padding: 0 27px 0 19px;
+      clip-path: polygon(0 0, calc(100% - 23px) 0, 100% 100%, 0 100%);
+      background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+      color: #fff;
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: -.025em;
+      text-transform: uppercase;
+      text-shadow: 0 1px rgba(0,0,0,.2);
+      animation: label-in .65s .25s both;
+    }
+    .ticker {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 39px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: linear-gradient(90deg, var(--accent-dark), var(--accent) 48%, var(--accent-dark));
+      color: var(--ticker-color);
+      box-shadow: inset 0 1px rgba(255,255,255,.26);
+    }
+    .ticker-lead {
+      z-index: 1;
+      flex: 0 0 auto;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      background: var(--accent-dark);
+      border-right: 2px solid rgba(255,255,255,.6);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .06em;
+    }
+    .ticker-viewport { flex: 1; min-width: 0; overflow: hidden; }
+    .ticker-track {
+      display: flex;
+      align-items: center;
+      width: max-content;
+      animation: crawl var(--crawl-duration, 34s) linear infinite;
+      will-change: transform;
+    }
+    .ticker-group { display: flex; flex: 0 0 auto; align-items: center; white-space: nowrap; }
+    .ticker-item { padding: 0 21px; font-size: 19px; font-weight: 700; letter-spacing: .005em; }
+    .ticker-separator { color: rgba(255,255,255,.7); font-size: 17px; }
+    .is-hidden { display: none !important; }
+    .lower-third.no-ticker .main-panel { bottom: 0; }
+
+    @keyframes panel-in { from { opacity: 0; transform: translateX(-95px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes label-in { from { opacity: 0; transform: translateX(-80px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes corner-in { from { opacity: 0; transform: translateY(-28px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes copy-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes headline-exit {
+      0% { opacity: 1; transform: translateX(0); clip-path: inset(0 0 0 0); }
+      100% { opacity: 0; transform: translateX(-300px); clip-path: inset(0 0 0 100%); }
+    }
+    @keyframes headline-entrance {
+      0% { opacity: 0; transform: translateX(300px); clip-path: inset(0 100% 0 0); }
+      100% { opacity: 1; transform: translateX(0); clip-path: inset(0 0 0 0); }
+    }
+    @keyframes headline-wipe {
+      0% { transform: translateX(-105%); }
+      45% { transform: translateX(0); }
+      57% { transform: translateX(0); }
+      100% { transform: translateX(105%); }
+    }
+    @keyframes support-flip-out {
+      from { opacity: 1; transform: perspective(600px) rotateX(0); }
+      to { opacity: 0; transform: perspective(600px) rotateX(-88deg); }
+    }
+    @keyframes support-flip-in {
+      from { opacity: 0; transform: perspective(600px) rotateX(88deg); }
+      to { opacity: 1; transform: perspective(600px) rotateX(0); }
+    }
+    @keyframes pulse { 50% { opacity: .55; box-shadow: 0 0 0 7px rgba(255,255,255,.08); } }
+    @keyframes crawl { to { transform: translateX(-50%); } }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <div class="live-corner" aria-label="Live broadcast clock">
+      <div class="live-label"><span class="live-dot"></span>LIVE</div>
+      <div class="clock-row"><div class="clock" id="clock">00:00:00</div><div class="clock-zone" id="clock-zone">EAT</div></div>
+    </div>
+
+    <div class="lower-third">
+      <div class="top-rule"></div>
+      <div class="breaking-label" id="label">BREAKING NEWS</div>
+      <div class="main-panel">
+        <div class="copy">
+          <div class="headline-frame" id="headline-frame"><h1 class="headline" id="headline">YOUR HEADLINE HERE</h1></div>
+          <div class="subtitle-frame" id="subtitle-frame"><p class="subtitle" id="subtitle">Your supporting line stays on screen</p></div>
+        </div>
+        <div class="logo-box" id="logo-box">
+          <div class="logo-placeholder">YOUR<br><span>LOGO</span></div>
+          <img class="logo-image" id="logo-image" alt="Channel logo">
+        </div>
+      </div>
+      <div class="ticker">
+        <div class="ticker-lead">LATEST</div>
+        <div class="ticker-viewport"><div class="ticker-track" id="ticker-track"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // These defaults work when opened as a local file. The control page overrides
+    // them automatically when both pages are served by news-overlay-server.py.
+    const defaults = {
+      label: "BREAKING NEWS",
+      headline: "YOUR HEADLINE HERE",
+      subtitle: "Your supporting line stays on screen",
+      ticker: "Replace this message with your scrolling update",
+      supportingLines: ["Your supporting line stays on screen"],
+      supportingInterval: 7,
+      tickerItems: ["Replace this message with your scrolling update"],
+      timeZone: "Africa/Nairobi",
+      zoneLabel: "EAT",
+      logo: "logo.png",
+      tickerSeconds: 34,
+      accent: "#c90013",
+      accentDark: "#87000c",
+      panelLight: "#ffffff",
+      panelDark: "#b6b9bc",
+      headlineColor: "#292a2d",
+      subtitleColor: "#616367",
+      tickerColor: "#ffffff",
+      logoBg: "#38393d",
+      showLive: true,
+      showLabel: true,
+      showSubtitle: true,
+      showTicker: true,
+      showLogo: true,
+      showSeconds: true,
+      bottomOffset: 54,
+      sideInset: 48,
+      cornerTop: 42,
+      cornerLeft: 48
+    };
+    let config = { ...defaults };
+    const params = new URLSearchParams(location.search);
+    if (params.get("preview") === "1") {
+      document.body.style.background = "linear-gradient(135deg, #32373d, #15171b 60%, #414449)";
+    }
+    for (const key of ["label", "headline", "subtitle", "ticker", "timeZone", "zoneLabel", "logo"]) {
+      if (params.has(key)) config[key] = params.get(key);
+    }
+    if (params.has("tickerSeconds")) config.tickerSeconds = Number(params.get("tickerSeconds")) || 34;
+    const byId = id => document.getElementById(id);
+    const root = document.documentElement;
+    const lowerThird = document.querySelector(".lower-third");
+    const liveCorner = document.querySelector(".live-corner");
+    const ticker = document.querySelector(".ticker");
+    const track = byId("ticker-track");
+    const logo = document.getElementById("logo-image");
+    const logoBox = byId("logo-box");
+    const headlineElement = byId("headline");
+    const headlineFrame = byId("headline-frame");
+    const subtitleElement = byId("subtitle");
+    const subtitleFrame = byId("subtitle-frame");
+    const copyPanel = document.querySelector(".copy");
+    let storyFinishTimer = null;
+    let outgoingHeadline = null;
+    let outgoingSubtitle = null;
+    let supportFlipTimer = null;
+    let supportFlipGhost = null;
+    let supportingRotationTimer = null;
+    let supportingIndex = 0;
+    function clearSupportingFlip() {
+      clearTimeout(supportFlipTimer);
+      if (supportFlipGhost) supportFlipGhost.remove();
+      supportFlipGhost = null;
+      subtitleElement.style.animation = "none";
+    }
+    function flipSupportingLine(text) {
+      clearSupportingFlip();
+      supportFlipGhost = subtitleElement.cloneNode(true);
+      supportFlipGhost.removeAttribute("id");
+      supportFlipGhost.classList.add("subtitle-ghost");
+      supportFlipGhost.style.animation = "support-flip-out .52s ease-in both";
+      subtitleFrame.appendChild(supportFlipGhost);
+      subtitleElement.textContent = text;
+      void subtitleElement.offsetWidth;
+      subtitleElement.style.animation = "support-flip-in .62s .5s ease-out both";
+      supportFlipTimer = setTimeout(clearSupportingFlip, 1200);
+    }
+    function resetSupportingRotation() {
+      clearInterval(supportingRotationTimer);
+      supportingIndex = 0;
+      if (!copyPanel.classList.contains("is-transitioning")) {
+        clearSupportingFlip();
+        subtitleElement.textContent = config.supportingLines[0] || "";
+      }
+      if (config.showSubtitle && config.supportingLines.length > 1) {
+        supportingRotationTimer = setInterval(() => {
+          supportingIndex = (supportingIndex + 1) % config.supportingLines.length;
+          flipSupportingLine(config.supportingLines[supportingIndex]);
+        }, config.supportingInterval * 1000);
+      }
+    }
+    function clearStoryTransition() {
+      clearTimeout(storyFinishTimer);
+      storyFinishTimer = null;
+      if (outgoingHeadline) outgoingHeadline.remove();
+      if (outgoingSubtitle) outgoingSubtitle.remove();
+      outgoingHeadline = null;
+      outgoingSubtitle = null;
+      copyPanel.classList.remove("is-transitioning");
+      headlineElement.style.animation = "none";
+      subtitleElement.style.animation = "none";
+    }
+    function setStory(headline, subtitle, animate) {
+      clearSupportingFlip();
+      clearStoryTransition();
+      if (!animate) {
+        headlineElement.textContent = headline;
+        subtitleElement.textContent = subtitle;
+        return;
+      }
+      // Keep the outgoing story visible while its replacement enters.
+      outgoingHeadline = headlineElement.cloneNode(true);
+      outgoingHeadline.removeAttribute("id");
+      outgoingHeadline.classList.add("headline-ghost");
+      outgoingHeadline.style.animation = "headline-exit .75s cubic-bezier(.55,.05,.68,.19) both";
+      headlineFrame.appendChild(outgoingHeadline);
+      outgoingSubtitle = subtitleElement.cloneNode(true);
+      outgoingSubtitle.removeAttribute("id");
+      outgoingSubtitle.classList.add("subtitle-ghost");
+      outgoingSubtitle.style.animation = "headline-exit .75s cubic-bezier(.55,.05,.68,.19) both";
+      subtitleFrame.appendChild(outgoingSubtitle);
+      headlineElement.textContent = headline;
+      subtitleElement.textContent = subtitle;
+      void headlineElement.offsetWidth;
+      headlineElement.style.animation = "headline-entrance .72s .82s cubic-bezier(.16,.8,.24,1) both";
+      subtitleElement.style.animation = "headline-entrance .72s .9s cubic-bezier(.16,.8,.24,1) both";
+      copyPanel.classList.add("is-transitioning");
+      storyFinishTimer = setTimeout(clearStoryTransition, 1800);
+    }
+    logo.onload = () => logoBox.classList.add("has-logo");
+    logo.onerror = () => logoBox.classList.remove("has-logo");
+    let formatter;
+    function setClockFormatter() {
+      const options = {
+        timeZone: config.timeZone,
+        hour: "2-digit", minute: "2-digit",
+        ...(config.showSeconds ? { second: "2-digit" } : {}),
+        hourCycle: "h23"
+      };
+      try { formatter = new Intl.DateTimeFormat("en-GB", options); }
+      catch (_) { delete options.timeZone; formatter = new Intl.DateTimeFormat("en-GB", options); }
+    }
+    function updateClock() { byId("clock").textContent = formatter.format(new Date()); }
+    function buildTicker() {
+      track.replaceChildren();
+      const group = document.createElement("div");
+      group.className = "ticker-group";
+      const messages = config.tickerItems.length ? config.tickerItems : [" "];
+      function addItem(message) {
+        const item = document.createElement("span");
+        item.className = "ticker-item";
+        item.textContent = message;
+        group.appendChild(item);
+        const separator = document.createElement("span");
+        separator.className = "ticker-separator";
+        separator.textContent = "◆";
+        group.appendChild(separator);
+      }
+      track.appendChild(group);
+      let copies = 0;
+      do {
+        for (const message of messages) addItem(message);
+      } while (group.offsetWidth < 1700 && copies++ < 40);
+      track.appendChild(group.cloneNode(true));
+    }
+    const cssFields = {
+      accent: "--accent", accentDark: "--accent-dark",
+      panelLight: "--panel-light", panelDark: "--panel-dark",
+      headlineColor: "--headline-color", subtitleColor: "--subtitle-color",
+      tickerColor: "--ticker-color", logoBg: "--logo-bg"
+    };
+    function applyState(next) {
+      const old = config;
+      config = { ...defaults, ...next };
+      config.supportingLines = Array.isArray(next.supportingLines) ? next.supportingLines
+        : (next.subtitle ? [next.subtitle] : []);
+      config.tickerItems = Array.isArray(next.tickerItems) ? next.tickerItems
+        : String(next.ticker || "").split(",").map(item => item.trim()).filter(Boolean);
+      for (const [field, cssVar] of Object.entries(cssFields)) root.style.setProperty(cssVar, config[field]);
+      root.style.setProperty("--bottom-offset", `${config.bottomOffset}px`);
+      root.style.setProperty("--side-inset", `${config.sideInset}px`);
+      root.style.setProperty("--corner-top", `${config.cornerTop}px`);
+      root.style.setProperty("--corner-left", `${config.cornerLeft}px`);
+      byId("label").textContent = config.label;
+      const linesChanged = JSON.stringify(old.supportingLines) !== JSON.stringify(config.supportingLines);
+      const storyChanged = old.headline !== config.headline || linesChanged;
+      const playedLive = Number.isInteger(old.storyRevision) && Number.isInteger(config.storyRevision)
+        && config.storyRevision > old.storyRevision;
+      if (storyChanged || playedLive) {
+        setStory(config.headline, config.supportingLines[0] || "",
+          (storyChanged || playedLive) && params.get("draft") !== "1");
+      }
+      if (storyChanged || playedLive || old.supportingInterval !== config.supportingInterval
+          || old.showSubtitle !== config.showSubtitle) resetSupportingRotation();
+      byId("clock-zone").textContent = config.zoneLabel;
+      liveCorner.classList.toggle("is-hidden", !config.showLive);
+      byId("label").classList.toggle("is-hidden", !config.showLabel);
+      subtitleFrame.classList.toggle("is-hidden", !config.showSubtitle || !config.supportingLines.length);
+      ticker.classList.toggle("is-hidden", !config.showTicker);
+      lowerThird.classList.toggle("no-ticker", !config.showTicker);
+      logoBox.classList.toggle("is-hidden", !config.showLogo);
+      if (old.logo !== config.logo) {
+        logoBox.classList.remove("has-logo");
+        logo.removeAttribute("src");
+        if (config.logo) logo.src = config.logo;
+      }
+      if (JSON.stringify(old.tickerItems) !== JSON.stringify(config.tickerItems)) buildTicker();
+      if (old.tickerSeconds !== config.tickerSeconds) {
+        track.style.setProperty("--crawl-duration", `${config.tickerSeconds}s`);
+      }
+      if (old.timeZone !== config.timeZone || old.showSeconds !== config.showSeconds) setClockFormatter();
+      updateClock();
+    }
+    // Force first render of logo, ticker, speed and clock formatter.
+    const initial = config;
+    config = { ...initial, logo: null, tickerItems: null, tickerSeconds: null, timeZone: null, showSeconds: null };
+    applyState(initial);
+    updateClock();
+    setInterval(updateClock, 250);
+    function fitStage() {
+      root.style.setProperty("--scale", Math.min(innerWidth / 1920, innerHeight / 1080));
+    }
+    fitStage();
+    addEventListener("resize", fitStage);
+    if (params.get("demo") === "lines") {
+      applyState({ ...config, headline: "SUPPORTING LINE DEMO",
+        supportingLines: ["FIRST SUPPORTING LINE", "SECOND SUPPORTING LINE", "THIRD SUPPORTING LINE"],
+        supportingInterval: 5, tickerItems: ["FIRST TICKER ITEM", "SECOND TICKER ITEM", "THIRD TICKER ITEM"] });
+    } else if (params.get("demo") === "1") {
+      const demoHeadlines = ["HEADLINE ANIMATION DEMO", "NEXT STORY IS COMING IN"];
+      let demoIndex = 0;
+      setTimeout(() => {
+        applyState({ ...config, headline: demoHeadlines[demoIndex++] });
+        setInterval(() => {
+          applyState({ ...config, headline: demoHeadlines[demoIndex++ % demoHeadlines.length] });
+        }, 3500);
+      }, 1000);
+    } else if (params.get("draft") === "1") {
+      addEventListener("message", event => {
+        if (event.origin === location.origin && event.data?.type === "draft-state") {
+          applyState(event.data.state);
+        }
+      });
+    } else if (location.protocol === "http:" || location.protocol === "https:") {
+      let lastRevision = -1;
+      addEventListener("message", event => {
+        if (event.origin === location.origin && event.data?.type === "live-state") {
+          lastRevision = event.data.state.revision;
+          applyState(event.data.state);
+        }
+      });
+      async function poll() {
+        try {
+          const response = await fetch("/api/state", { cache: "no-store" });
+          if (!response.ok) throw new Error("State unavailable");
+          const state = await response.json();
+          if (state.revision > lastRevision) {
+            lastRevision = state.revision;
+            applyState(state);
+          }
+        } catch (error) { console.warn("Overlay state:", error.message); }
+        setTimeout(poll, 400);
+      }
+      poll();
+    }
+  </script>
+</body>
+</html>

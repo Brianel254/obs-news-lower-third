@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Broadcast Desk — Lower Third Controls</title>
+  <style>
+    :root { color-scheme: dark; --red:#e10b25; --muted:#a2a5ae; --line:#30333b; --card:#1b1d23; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background:#111217; color:#f6f6f7; font-family:"Bahnschrift","Segoe UI",sans-serif; }
+    button, input, textarea { font: inherit; }
+    button { cursor:pointer; }
+    .masthead { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:28px clamp(24px,4vw,64px); border-bottom:1px solid var(--line); background:#17191e; }
+    .brand { display:flex; align-items:center; gap:18px; }
+    .brand-mark { display:grid; place-items:center; width:46px; height:46px; background:var(--red); font-size:26px; font-weight:900; transform:skewX(-10deg); box-shadow:5px 5px 0 #5e0714; }
+    .eyebrow { color:#f06b78; font-size:11px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; }
+    h1 { margin:2px 0 0; font-size:30px; line-height:1; letter-spacing:-.035em; text-transform:uppercase; }
+    .mast-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .status { display:flex; align-items:center; gap:8px; color:#d2d4d8; font-size:13px; font-weight:700; white-space:nowrap; }
+    .status-dot { width:8px; height:8px; border-radius:50%; background:#f5aa40; box-shadow:0 0 0 4px #f5aa4022; }
+    .status.ok .status-dot { background:#4ed59b; box-shadow:0 0 0 4px #4ed59b22; }
+    .status.error .status-dot { background:#ec4051; box-shadow:0 0 0 4px #ec405122; }
+    .button { border:1px solid #454851; background:#282b33; color:white; padding:11px 16px; font-size:13px; font-weight:800; letter-spacing:.03em; text-decoration:none; transition:background .15s,border-color .15s; }
+    .button:hover { background:#383c45; border-color:#747984; }
+    .button.primary { background:#b7071b; border-color:#e01c32; }
+    .button.primary:hover { background:#df132c; }
+    .layout { max-width:1700px; margin:0 auto; padding:34px clamp(24px,4vw,64px) 80px; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(380px,.75fr); gap:30px; align-items:start; }
+    .preview-column { position:sticky; top:24px; }
+    .section-heading { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:15px; }
+    .preview-toggle { display:flex; border:1px solid #4b4e58; }
+    .preview-toggle button { border:0; padding:7px 11px; background:#252830; color:#aaaeb7; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+    .preview-toggle button.active { background:#b4081d; color:#fff; }
+    h2 { margin:0; font-size:16px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+    .hint { color:var(--muted); font-size:12px; }
+    .preview-shell { border:1px solid #4a4d56; background:#2b2e34; padding:11px; box-shadow:0 18px 36px #0006; }
+    .preview-stack { position:relative; width:100%; aspect-ratio:16/9; background:#25282d; }
+    .preview-frame { position:absolute; inset:0; width:100%; height:100%; display:block; border:0; background:#25282d; }
+    .preview-frame.is-off { visibility:hidden; pointer-events:none; }
+    .preview-foot { display:flex; justify-content:space-between; gap:18px; padding:17px 3px 0; color:var(--muted); font-size:13px; line-height:1.5; }
+    .preview-foot strong { color:#fafafa; }
+    .url { margin-top:30px; background:#191b20; border:1px solid var(--line); padding:20px 22px; }
+    .url-label { color:#f06b78; font-size:11px; letter-spacing:.18em; font-weight:800; text-transform:uppercase; }
+    .url code { display:block; margin-top:10px; color:#e9eaed; font:14px/1.6 Consolas,monospace; overflow-wrap:anywhere; }
+    .controls { display:grid; grid-template-columns:minmax(0,1fr); gap:18px; min-width:0; }
+    .card { min-width:0; border:1px solid var(--line); background:var(--card); padding:25px; }
+    .card h2 { padding-bottom:16px; border-bottom:1px solid #373a42; margin-bottom:20px; }
+    .field { display:block; margin-bottom:17px; }
+    .field:last-child { margin-bottom:0; }
+    .field > span, .field > label, .group-label { display:block; margin-bottom:8px; color:#bec1c8; font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .field input[type=text], .field textarea { width:100%; border:1px solid #444750; outline:none; border-radius:0; background:#111318; color:#fff; padding:12px 13px; font-size:15px; }
+    .field textarea { min-height:76px; resize:vertical; }
+    .field input:focus, .field textarea:focus { border-color:#ec3548; box-shadow:0 0 0 2px #d8172e33; }
+    .note { margin:8px 0 0; color:#888d97; font-size:12px; line-height:1.45; }
+    .upload-row { display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
+    .upload-row input[type=file] { max-width:210px; color:#acb0b8; font-size:12px; }
+    .two { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .presets { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:19px; }
+    .preset { border:1px solid #52545c; padding:9px 12px; background:#24272d; color:white; font-size:12px; font-weight:800; }
+    .preset:hover { border-color:#bbb; }
+    .preset::before { content:""; display:inline-block; width:10px; height:10px; margin-right:7px; background:var(--swatch); vertical-align:-1px; }
+    .color-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .color-field { display:flex; align-items:center; justify-content:space-between; gap:10px; border:1px solid #41444c; padding:8px 10px; color:#c7c9cf; font-size:12px; font-weight:700; }
+    .color-field input { width:40px; height:28px; padding:0; border:0; background:transparent; cursor:pointer; }
+    .range-field { margin:0 0 19px; }
+    .range-top { display:flex; justify-content:space-between; gap:12px; margin-bottom:7px; color:#c1c3ca; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+    .range-top output { color:#fff; font-variant-numeric:tabular-nums; }
+    input[type=range] { width:100%; accent-color:#dd0f29; cursor:pointer; }
+    .toggles { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+    .toggle { display:flex; align-items:center; gap:9px; color:#e0e1e5; font-size:13px; }
+    .toggle input { width:17px; height:17px; accent-color:#d30a23; }
+    .on-air { margin-top:16px; border-left:4px solid var(--red); background:#272126; padding:12px 16px; color:#fff; font-size:14px; }
+    .on-air strong { color:#fa7481; font-size:11px; letter-spacing:.15em; margin-right:12px; }
+    .on-air-detail { display:block; margin:6px 0 0 59px; color:#c7bfc3; font-size:12px; }
+    .action-row { display:flex; gap:9px; flex-wrap:wrap; margin-top:15px; }
+    .cue-list { display:grid; grid-template-columns:minmax(0,1fr); gap:9px; margin-top:18px; min-width:0; }
+    .cue { border:1px solid #41444d; background:#14161b; padding:14px; display:flex; gap:12px; justify-content:space-between; align-items:center; }
+    .cue.active { border-color:#dd2338; box-shadow:inset 3px 0 #dd2338; }
+    .cue > div:first-child { min-width:0; flex:1; }
+    .cue-title { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#f7f7f8; font-size:15px; font-weight:800; }
+    .cue-summary { display:block; margin-top:3px; color:#a8acb6; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:300px; }
+    .cue-actions { display:flex; gap:5px; flex:0 0 auto; }
+    .cue-actions button { border:1px solid #4d5058; padding:8px 10px; background:#282b32; color:#fff; font-size:11px; font-weight:800; }
+    .cue-actions .go { background:#a6081d; border-color:#d61c33; }
+    .cue-actions .remove { color:#d7a3a9; }
+    .empty { color:#9296a0; border:1px dashed #474b54; padding:18px; font-size:13px; }
+    .desk-tabs { display:flex; min-width:0; gap:3px; border-bottom:1px solid #52555e; margin-bottom:1px; }
+    .desk-tabs button { flex:1; border:1px solid #393c44; border-bottom:0; padding:16px 14px; background:#1a1c22; color:#aeb2ba; font-size:13px; font-weight:900; letter-spacing:.11em; text-transform:uppercase; }
+    .desk-tabs button[aria-selected="true"] { background:#af0920; border-color:#d5213a; color:white; box-shadow:inset 0 3px #f16b7b; }
+    .tab-panel { display:grid; grid-template-columns:minmax(0,1fr); min-width:0; gap:18px; }
+    .tab-panel[hidden] { display:none; }
+    .section-intro { color:#adb1bb; font-size:13px; line-height:1.55; margin:0 0 2px; padding:15px 18px; border:1px solid #393c45; background:#17191f; }
+    .support-list { display:grid; gap:9px; margin-bottom:12px; }
+    .support-row { display:flex; gap:8px; align-items:center; }
+    .support-row input { flex:1; min-width:0; border:1px solid #444750; background:#111318; color:white; padding:11px 12px; font-size:14px; }
+    .support-row button { border:1px solid #4d5058; background:#282b32; color:#e5b6bc; padding:10px 13px; font-weight:900; }
+    .small-button { border:1px solid #62656e; background:#2a2d35; color:#fff; padding:9px 12px; font-size:12px; font-weight:800; }
+    .field select { width:100%; border:1px solid #444750; background:#111318; color:#fff; padding:11px 12px; font-size:14px; }
+    .ticker-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .ticker-chips span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:6px 9px; border:1px solid #6f2933; background:#301b21; color:#f6dadd; font-size:11px; font-weight:700; }
+    @media (max-width:1000px) { .layout { grid-template-columns:1fr; } .preview-column { position:static; } }
+    @media (max-width:650px) { .masthead { align-items:flex-start; flex-direction:column; } .two,.color-grid { grid-template-columns:1fr; } .card { padding:20px; } }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="brand"><div class="brand-mark">N</div><div><div class="eyebrow">On-air graphics / Control 01</div><h1>Broadcast Desk</h1></div></div>
+    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button primary" href="/news-lower-third.html?v=20261014-4" target="_blank" rel="noopener">Open overlay ↗</a></div>
+  </header>
+
+  <main class="layout">
+    <section class="preview-column" aria-label="Live preview">
+      <div class="section-heading"><h2>Output monitor</h2><div class="preview-toggle"><button type="button" data-preview="draft">Draft</button><button type="button" data-preview="live" class="active">Live output</button></div></div>
+      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261014-4" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261014-4" title="Draft lower-third preview"></iframe></div></div>
+      <div class="on-air"><strong>ON AIR</strong><span id="on-air-headline">Connecting…</span><span class="on-air-detail" id="on-air-lines"></span></div>
+      <div class="preview-foot"><span><strong>Preview your draft, then play it live.</strong><br>Keep the server window open during your broadcast.</span><span>Transparent in OBS<br>Dark backdrop here for preview</span></div>
+      <div class="url"><div class="url-label">OBS Browser Source URL</div><code id="obs-url"></code><p class="note">Set the source width to 1920 and height to 1080. Update this URL once in OBS to load the new supporting lines and ticker list.</p></div>
+    </section>
+
+    <section class="controls" aria-label="Overlay controls">
+      <div class="desk-tabs" role="tablist" aria-label="Control areas">
+        <button type="button" id="stories-tab" role="tab" aria-controls="stories-panel" aria-selected="true">Stories</button>
+        <button type="button" id="core-tab" role="tab" aria-controls="core-panel" aria-selected="false">Broadcast settings</button>
+      </div>
+      <div class="tab-panel" id="stories-panel" role="tabpanel" aria-labelledby="stories-tab">
+      <p class="section-intro">Prepare each headline here. A saved story carries its label, headline and supporting lines. The ticker, logo and theme are shared in Broadcast settings.</p>
+      <div class="card"><h2>00 / Saved headline cues</h2>
+        <label class="field"><span>Cue name</span><input id="cue-name" type="text" maxlength="80" placeholder="e.g. Opening headline"></label>
+        <div class="action-row">
+          <button class="button" id="save-cue" type="button">Save cue</button>
+          <button class="button" id="save-new" type="button">Save as new</button>
+          <button class="button primary" id="take-draft-live" type="button">Take draft live</button>
+        </div>
+        <p class="note">Save as many stories as you need. Press Play Live beside a cue to put it on air.</p>
+        <div class="cue-list" id="cue-list"><div class="empty">No saved cues yet.</div></div>
+      </div>
+      <div class="card"><h2>01 / Story copy</h2>
+        <label class="field"><span>Top label</span><input type="text" data-story="label" maxlength="48"></label>
+        <label class="field"><span>Static headline</span><input type="text" data-story="headline" maxlength="180"></label>
+        <div class="field"><span>Supporting lines · up to 4</span><div class="support-list" id="supporting-list"></div><button class="small-button" id="add-supporting" type="button">+ Add supporting line</button><p class="note">Add at least 2 filled lines to rotate. Save the cue, then press Play Live to put those lines on air.</p></div>
+        <label class="field"><span>Change supporting line every</span><select id="supporting-interval"><option value="5">5 seconds</option><option value="7">7 seconds</option><option value="10">10 seconds</option></select></label>
+      </div>
+
+      </div>
+      <div class="tab-panel" id="core-panel" role="tabpanel" aria-labelledby="core-tab" hidden>
+      <p class="section-intro">These settings are shared by every story. Save them once and they update the live overlay without changing your saved headlines.</p>
+      <div class="card"><h2>Shared broadcast settings</h2><button class="button primary" id="save-core" type="button">Save shared settings</button><p class="note">Applies to the live output immediately.</p></div>
+
+      <div class="card"><h2>Animated ticker items</h2><div class="field"><label for="ticker-input">Shared ticker list</label><textarea id="ticker-input" maxlength="4000" placeholder="First update, Second update, Third update"></textarea><p class="note">One list for every saved story. Paste items separated by commas or new lines, then save shared settings.</p><div class="ticker-chips" id="ticker-chips"></div></div></div>
+
+      <div class="card"><h2>02 / Logo & clock</h2>
+        <label class="field"><span>Logo URL or local filename</span><input type="text" data-core="logo" maxlength="2048" placeholder="logo.png or https://…"></label>
+        <div class="upload-row"><input id="logo-file" type="file" accept="image/png,image/jpeg,image/webp"><span class="note">PNG, JPEG or WebP, up to 6 MB</span></div>
+        <div class="two" style="margin-top:20px">
+          <label class="field"><span>Time zone</span><input type="text" data-core="timeZone" maxlength="80" placeholder="Africa/Nairobi"></label>
+          <label class="field"><span>Clock tag</span><input type="text" data-core="zoneLabel" maxlength="12" placeholder="EAT"></label>
+        </div>
+      </div>
+
+      <div class="card"><h2>03 / Theme</h2>
+        <div class="presets">
+          <button class="preset" type="button" data-preset="red" style="--swatch:#c90013">Classic red</button>
+          <button class="preset" type="button" data-preset="blue" style="--swatch:#006acc">Studio blue</button>
+          <button class="preset" type="button" data-preset="gold" style="--swatch:#b97900">Gold</button>
+          <button class="preset" type="button" data-preset="green" style="--swatch:#008866">Emerald</button>
+        </div>
+        <div class="color-grid">
+          <label class="color-field">Accent <input type="color" data-core="accent"></label>
+          <label class="color-field">Accent dark <input type="color" data-core="accentDark"></label>
+          <label class="color-field">Panel light <input type="color" data-core="panelLight"></label>
+          <label class="color-field">Panel dark <input type="color" data-core="panelDark"></label>
+          <label class="color-field">Headline <input type="color" data-core="headlineColor"></label>
+          <label class="color-field">Subline <input type="color" data-core="subtitleColor"></label>
+          <label class="color-field">Ticker text <input type="color" data-core="tickerColor"></label>
+          <label class="color-field">Logo panel <input type="color" data-core="logoBg"></label>
+        </div>
+      </div>
+
+      <div class="card"><h2>04 / Motion & placement</h2>
+        <div class="range-field"><div class="range-top"><span>Ticker loop</span><output data-output-for="tickerSeconds"></output></div><input type="range" data-core="tickerSeconds" min="8" max="120" step="1"><p class="note">Shorter duration scrolls faster.</p></div>
+        <div class="range-field"><div class="range-top"><span>Distance from bottom</span><output data-output-for="bottomOffset"></output></div><input type="range" data-core="bottomOffset" min="0" max="250" step="1"></div>
+        <div class="range-field"><div class="range-top"><span>Side margins</span><output data-output-for="sideInset"></output></div><input type="range" data-core="sideInset" min="0" max="250" step="1"></div>
+        <div class="two">
+          <div class="range-field"><div class="range-top"><span>LIVE from top</span><output data-output-for="cornerTop"></output></div><input type="range" data-core="cornerTop" min="0" max="250" step="1"></div>
+          <div class="range-field"><div class="range-top"><span>LIVE from left</span><output data-output-for="cornerLeft"></output></div><input type="range" data-core="cornerLeft" min="0" max="250" step="1"></div>
+        </div>
+      </div>
+
+      <div class="card"><h2>05 / Visibility</h2>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" data-core="showLive">LIVE clock</label>
+          <label class="toggle"><input type="checkbox" data-core="showSeconds">Clock seconds</label>
+          <label class="toggle"><input type="checkbox" data-core="showLabel">Top label</label>
+          <label class="toggle"><input type="checkbox" data-core="showSubtitle">Supporting line</label>
+          <label class="toggle"><input type="checkbox" data-core="showTicker">Scrolling ticker</label>
+          <label class="toggle"><input type="checkbox" data-core="showLogo">Logo area</label>
+        </div>
+      </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const serviceOrigin = location.protocol === "file:" ? "http://127.0.0.1:8080" : location.origin;
+    const obsUrl = new URL("/news-lower-third.html?v=20261014-4", serviceOrigin).href;
+    document.getElementById("obs-url").textContent = obsUrl;
+    const status = document.getElementById("status");
+    const storyFields = [...document.querySelectorAll("[data-story]")];
+    const coreFields = [...document.querySelectorAll("[data-core]")];
+    const liveFrame = document.getElementById("preview-live");
+    const draftFrame = document.getElementById("preview-draft");
+    let previewMode = "live";
+    let ready = false;
+    let cues = [];
+    let activeCueId = "";
+    let editingCueId = "";
+    let actionChain = Promise.resolve();
+    let liveState = {};
+    let coreDirty = false;
+    let activeTab = "stories";
+    function setStatus(message, kind = "") {
+      status.className = `status ${kind}`;
+      status.querySelector("span").textContent = message;
+    }
+    async function api(path, data) {
+      const response = await fetch(path, data === undefined ? { cache: "no-store" } : {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Connection failed");
+      return result;
+    }
+    function runAction(work) {
+      actionChain = actionChain.catch(() => {}).then(work).catch(error => setStatus(error.message, "error"));
+      return actionChain;
+    }
+    function updateOutputs() {
+      for (const output of document.querySelectorAll("[data-output-for]")) {
+        const key = output.dataset.outputFor;
+        const value = document.querySelector(`[data-core="${key}"]`).value;
+        output.textContent = key === "tickerSeconds" ? `${value} s` : `${value} px`;
+      }
+    }
+    function addSupportingRow(value = "") {
+      const list = document.getElementById("supporting-list");
+      if (list.children.length >= 4) return;
+      const row = document.createElement("div");
+      row.className = "support-row";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.maxLength = 220;
+      input.placeholder = `Supporting line ${list.children.length + 1}`;
+      input.setAttribute("aria-label", input.placeholder);
+      input.value = value;
+      input.addEventListener("input", () => markDraft("story"));
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", `Remove ${input.placeholder.toLowerCase()}`);
+      remove.addEventListener("click", () => { row.remove(); updateSupportingControls(); markDraft("story"); });
+      row.append(input, remove);
+      list.appendChild(row);
+      updateSupportingControls();
+    }
+    function updateSupportingControls() {
+      const rows = [...document.getElementById("supporting-list").children];
+      rows.forEach((row, index) => {
+        const name = `Supporting line ${index + 1}`;
+        row.querySelector("input").placeholder = name;
+        row.querySelector("input").setAttribute("aria-label", name);
+        row.querySelector("button").setAttribute("aria-label", `Remove ${name.toLowerCase()}`);
+      });
+      document.getElementById("add-supporting").disabled = rows.length >= 4;
+    }
+    function parseTickerItems() {
+      return document.getElementById("ticker-input").value.split(/[,\n]+/).map(item => item.trim()).filter(Boolean);
+    }
+    function renderTickerChips() {
+      const chips = document.getElementById("ticker-chips");
+      chips.replaceChildren();
+      for (const item of parseTickerItems()) {
+        const chip = document.createElement("span");
+        chip.textContent = item;
+        chips.appendChild(chip);
+      }
+    }
+    function fillStory(state) {
+      for (const field of storyFields) {
+        const value = state[field.dataset.story];
+        if (value === undefined) continue;
+        field.value = value;
+      }
+      const lines = Array.isArray(state.supportingLines) ? state.supportingLines : (state.subtitle ? [state.subtitle] : []);
+      document.getElementById("supporting-list").replaceChildren();
+      for (const line of lines.slice(0, 4)) addSupportingRow(line);
+      document.getElementById("supporting-interval").value = String(state.supportingInterval || 7);
+      updateDraftPreview();
+    }
+    function fillCore(state) {
+      for (const field of coreFields) {
+        const value = state[field.dataset.core];
+        if (value === undefined) continue;
+        if (field.type === "checkbox") field.checked = value;
+        else field.value = value;
+      }
+      const items = Array.isArray(state.tickerItems) ? state.tickerItems : (state.ticker || "").split(",");
+      document.getElementById("ticker-input").value = items.join(", ");
+      renderTickerChips();
+      updateOutputs();
+      updateDraftPreview();
+    }
+    function collectStory() {
+      const values = {};
+      for (const field of storyFields) values[field.dataset.story] = field.value;
+      values.supportingLines = [...document.querySelectorAll("#supporting-list input")]
+        .map(input => input.value.trim()).filter(Boolean);
+      values.supportingInterval = Number(document.getElementById("supporting-interval").value);
+      return values;
+    }
+    function collectCore() {
+      const values = {};
+      for (const field of coreFields) {
+        values[field.dataset.core] = field.type === "checkbox" ? field.checked
+          : field.type === "range" ? Number(field.value) : field.value;
+      }
+      values.tickerItems = parseTickerItems();
+      return values;
+    }
+    function updateDraftPreview() {
+      if (draftFrame.contentWindow) {
+        const draft = activeTab === "core" ? { ...liveState, ...collectCore() }
+          : { ...liveState, ...collectStory() };
+        draftFrame.contentWindow.postMessage({ type: "draft-state", state: draft }, serviceOrigin);
+      }
+    }
+    draftFrame.addEventListener("load", updateDraftPreview);
+    function showPreview(mode) {
+      previewMode = mode;
+      liveFrame.classList.toggle("is-off", mode !== "live");
+      draftFrame.classList.toggle("is-off", mode !== "draft");
+      for (const button of document.querySelectorAll("[data-preview]")) {
+        button.classList.toggle("active", button.dataset.preview === mode);
+      }
+    }
+    for (const button of document.querySelectorAll("[data-preview]")) {
+      button.addEventListener("click", () => showPreview(button.dataset.preview));
+    }
+    function markDraft(scope) {
+      if (scope === "core") coreDirty = true;
+      updateOutputs();
+      renderTickerChips();
+      updateDraftPreview();
+      showPreview("draft");
+      if (ready) setStatus(scope === "core" ? "Shared settings draft · save to apply" : "Story draft ready · not live", "ok");
+    }
+    for (const field of storyFields) {
+      field.addEventListener("input", () => markDraft("story"));
+    }
+    for (const field of coreFields) {
+      field.addEventListener("input", () => markDraft("core"));
+      field.addEventListener("change", () => markDraft("core"));
+    }
+    document.getElementById("supporting-interval").addEventListener("change", () => markDraft("story"));
+    document.getElementById("ticker-input").addEventListener("input", () => markDraft("core"));
+    document.getElementById("add-supporting").addEventListener("click", () => { addSupportingRow(); markDraft("story"); });
+    function showTab(name) {
+      activeTab = name;
+      document.getElementById("stories-panel").hidden = name !== "stories";
+      document.getElementById("core-panel").hidden = name !== "core";
+      document.getElementById("stories-tab").setAttribute("aria-selected", String(name === "stories"));
+      document.getElementById("core-tab").setAttribute("aria-selected", String(name === "core"));
+      updateDraftPreview();
+      showPreview("draft");
+    }
+    document.getElementById("stories-tab").addEventListener("click", () => showTab("stories"));
+    document.getElementById("core-tab").addEventListener("click", () => showTab("core"));
+    const presets = {
+      red: {accent:"#c90013",accentDark:"#87000c",panelLight:"#ffffff",panelDark:"#b6b9bc",headlineColor:"#292a2d",subtitleColor:"#616367",tickerColor:"#ffffff",logoBg:"#38393d"},
+      blue: {accent:"#006acc",accentDark:"#003a77",panelLight:"#ffffff",panelDark:"#b8c8d9",headlineColor:"#172337",subtitleColor:"#4b6176",tickerColor:"#ffffff",logoBg:"#102841"},
+      gold: {accent:"#b97900",accentDark:"#694400",panelLight:"#fff9e9",panelDark:"#ddc6a0",headlineColor:"#302617",subtitleColor:"#6d5b42",tickerColor:"#ffffff",logoBg:"#332819"},
+      green: {accent:"#008866",accentDark:"#00523d",panelLight:"#f5fff9",panelDark:"#b6d4c6",headlineColor:"#173129",subtitleColor:"#506b61",tickerColor:"#ffffff",logoBg:"#18342c"}
+    };
+    for (const button of document.querySelectorAll("[data-preset]")) {
+      button.addEventListener("click", () => {
+        for (const [key, value] of Object.entries(presets[button.dataset.preset])) {
+          document.querySelector(`[data-core="${key}"]`).value = value;
+        }
+        markDraft("core");
+      });
+    }
+    document.getElementById("copy-url").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(obsUrl); setStatus("OBS URL copied", "ok"); }
+      catch (_) { setStatus("Copy the URL shown below", "error"); }
+    });
+    function showLiveState(state) {
+      liveState = state;
+      activeCueId = state.activeCueId || "";
+      document.getElementById("on-air-headline").textContent = state.headline || "No headline";
+      const lineCount = (state.supportingLines || []).filter(line => String(line).trim()).length;
+      document.getElementById("on-air-lines").textContent = lineCount > 1
+        ? `${lineCount} supporting lines · rotating every ${state.supportingInterval || 7} seconds`
+        : `${lineCount} supporting line${lineCount === 1 ? "" : "s"} · add at least 2 to rotate`;
+      if (!coreDirty) fillCore(state);
+      renderCues();
+    }
+    function pushLivePreview(state) {
+      if (liveFrame.contentWindow) {
+        liveFrame.contentWindow.postMessage({ type: "live-state", state }, serviceOrigin);
+      }
+    }
+    function renderCues() {
+      const list = document.getElementById("cue-list");
+      list.replaceChildren();
+      if (!cues.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "No saved cues yet. Prepare text below and click Save cue.";
+        list.appendChild(empty);
+        return;
+      }
+      for (const cue of cues) {
+        const row = document.createElement("div");
+        row.className = `cue${cue.id === activeCueId ? " active" : ""}`;
+        const info = document.createElement("div");
+        const title = document.createElement("span");
+        title.className = "cue-title";
+        title.textContent = cue.name;
+        const summary = document.createElement("span");
+        summary.className = "cue-summary";
+        const lineCount = (cue.settings.supportingLines || []).length;
+        summary.textContent = `${cue.settings.headline || "No headline"} · ${lineCount} supporting line${lineCount === 1 ? "" : "s"}${lineCount > 1 ? " · rotates" : ""}`;
+        info.append(title, summary);
+        const actions = document.createElement("div");
+        actions.className = "cue-actions";
+        for (const [label, className, action] of [
+          ["▶ PLAY LIVE", "go", () => playCue(cue.id)],
+          ["Edit", "", () => editCue(cue)],
+          ["×", "remove", () => deleteCue(cue.id)]
+        ]) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = className;
+          button.textContent = label;
+          button.addEventListener("click", action);
+          actions.appendChild(button);
+        }
+        row.append(info, actions);
+        list.appendChild(row);
+      }
+    }
+    function editCue(cue) {
+      editingCueId = cue.id;
+      document.getElementById("cue-name").value = cue.name;
+      fillStory(cue.settings);
+      showTab("stories");
+      showPreview("draft");
+      setStatus(`Editing “${cue.name}” · not live`, "ok");
+    }
+    function saveCue(asNew = false) {
+      if (!ready) return;
+      const settings = collectStory();
+      const name = document.getElementById("cue-name").value.trim() || settings.headline.trim().slice(0, 80) || "Untitled cue";
+      setStatus("Saving cue…");
+      runAction(async () => {
+        const result = await api("/api/cues/save", { id: asNew ? "" : editingCueId, name, settings });
+        cues = result.cues;
+        editingCueId = result.cue.id;
+        document.getElementById("cue-name").value = result.cue.name;
+        renderCues();
+        setStatus(`Saved “${result.cue.name}” with ${settings.supportingLines.length} supporting line${settings.supportingLines.length === 1 ? "" : "s"} · play live`, "ok");
+      });
+    }
+    function playCue(id) {
+      showPreview("live");
+      setStatus("Sending cue live…");
+      runAction(async () => {
+        // Let the live monitor paint before its story animation starts.
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const state = await api("/api/activate", { id });
+        showLiveState(state);
+        pushLivePreview(state);
+        setStatus("Cue is live in OBS", "ok");
+      });
+    }
+    function deleteCue(id) {
+      const cue = cues.find(item => item.id === id);
+      if (!cue || !confirm(`Delete saved cue “${cue.name}”?`)) return;
+      runAction(async () => {
+        const result = await api("/api/cues/delete", { id });
+        cues = result.cues;
+        if (editingCueId === id) editingCueId = "";
+        if (activeCueId === id) activeCueId = "";
+        renderCues();
+        setStatus("Cue deleted", "ok");
+      });
+    }
+    document.getElementById("save-cue").addEventListener("click", () => saveCue(false));
+    document.getElementById("save-new").addEventListener("click", () => saveCue(true));
+    document.getElementById("save-core").addEventListener("click", () => {
+      if (!ready) return;
+      const settings = collectCore();
+      setStatus("Saving shared settings…");
+      runAction(async () => {
+        const state = await api("/api/core", settings);
+        coreDirty = false;
+        showLiveState(state);
+        pushLivePreview(state);
+        showPreview("live");
+        setStatus("Shared settings applied to every story", "ok");
+      });
+    });
+    document.getElementById("take-draft-live").addEventListener("click", () => {
+      if (!ready) return;
+      const settings = collectStory();
+      showPreview("live");
+      setStatus("Sending draft live…");
+      runAction(async () => {
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const state = await api("/api/activate", { settings });
+        showLiveState(state);
+        pushLivePreview(state);
+        setStatus("Draft is live in OBS", "ok");
+      });
+    });
+    document.getElementById("logo-file").addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      setStatus("Uploading logo…");
+      runAction(async () => {
+        const response = await fetch("/api/logo", {
+          method: "POST", headers: { "Content-Type": file.type }, body: file
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Logo upload failed");
+        document.querySelector('[data-core="logo"]').value = result.logo;
+        markDraft("core");
+        setStatus("Logo added to shared settings draft · save to apply", "ok");
+      });
+      event.target.value = "";
+    });
+    async function initialize() {
+      if (location.protocol === "file:") {
+        setStatus("Start start-news-overlay.bat, then open the control URL", "error");
+        return;
+      }
+      try {
+        const [state, library] = await Promise.all([api("/api/state"), api("/api/cues")]);
+        cues = library.cues;
+        liveState = state;
+        fillCore(state);
+        fillStory(state);
+        showLiveState(state);
+        ready = true;
+        setStatus("Connected · ready", "ok");
+      } catch (error) { setStatus(error.message, "error"); }
+    }
+    initialize();
+    setInterval(async () => {
+      if (!ready) return;
+      try {
+        showLiveState(await api("/api/state"));
+        if (status.classList.contains("error")) setStatus("Connected · ready", "ok");
+      } catch (_) { setStatus("Disconnected · restart the local server", "error"); }
+    }, 2500);
+  </script>
+</body>
+</html>
