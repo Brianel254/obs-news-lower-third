@@ -60,6 +60,19 @@ class OverlaySeparationTest(unittest.TestCase):
                 self.assertEqual(reloaded["tickerItems"], ["Shared one", "Shared two"])
                 self.assertEqual(reloaded["supportingLines"], ["One", "Two", "Three"])
                 self.assertFalse(reloaded["showOverlay"])
+                edited = post("/api/cues/save", {"id": saved["cue"]["id"], "name": "Updated lead",
+                                                   "settings": {"label": "LIVE UPDATE", "headline": "NEW HEADLINE",
+                                                                "supportingLines": ["First", "Second"],
+                                                                "supportingInterval": 10}})
+                self.assertEqual(len(edited["cues"]), 1)
+                with urlopen(base + "/api/state") as response:
+                    still_live = json.load(response)
+                self.assertEqual(still_live["headline"], "EVENING LEAD")
+                replayed = post("/api/activate", {"id": saved["cue"]["id"]})
+                self.assertEqual(replayed["headline"], "NEW HEADLINE")
+                self.assertEqual(replayed["supportingLines"], ["First", "Second"])
+                self.assertEqual(replayed["supportingInterval"], 10)
+                self.assertEqual(replayed["tickerItems"], ["Shared one", "Shared two"])
             finally:
                 server.shutdown()
                 server.server_close()

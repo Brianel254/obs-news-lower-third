@@ -67,18 +67,42 @@
     .list-head { display: flex; align-items: center; min-height: 31px; padding: 0 11px 0 13px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
     .list-head span:last-child { margin-left: auto; color: #8c97aa; font-variant-numeric: tabular-nums; }
     .cue-list { min-height: 0; flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 6px 10px; scrollbar-color: #586071 transparent; scrollbar-width: thin; }
-    .cue-row { display: grid; grid-template-columns: 20px minmax(0,1fr) 30px; align-items: center; column-gap: 5px; min-height: 47px; margin: 2px 0; padding: 4px 3px 4px 8px; border: 1px solid transparent; border-left: 2px solid transparent; border-radius: 3px; color: #dfe3ea; }
+    .cue-item { margin: 2px 0; }
+    .cue-row { display: grid; grid-template-columns: minmax(0,1fr) 30px; align-items: center; column-gap: 2px; min-height: 47px; padding: 3px; border: 1px solid transparent; border-left: 2px solid transparent; border-radius: 3px; color: #dfe3ea; }
     .cue-row:hover { background: #2d323c; }
     .cue-row.active { border-color: #486cbd; border-left-color: #8bb0ff; background: var(--blue); color: #fff; }
+    .cue-row.expanded { border-color: #526da4; border-bottom-right-radius: 0; border-bottom-left-radius: 0; background: #344360; }
+    .cue-row.active.expanded { background: var(--blue); }
+    .cue-open { display: grid; grid-template-columns: 20px minmax(0,1fr) 13px; align-items: center; column-gap: 5px; min-width: 0; width: 100%; padding: 3px 2px 3px 5px; border: 0; border-radius: 3px; background: transparent; color: inherit; text-align: left; }
+    .cue-open:hover { color: #fff; }
     .cue-symbol { width: 16px; height: 16px; color: #9aa5b6; }
     .cue-row.active .cue-symbol { color: #dce8ff; }
     .cue-copy { min-width: 0; }
     .cue-name { display: block; overflow: hidden; font-size: 12px; font-weight: 640; text-overflow: ellipsis; white-space: nowrap; }
     .cue-headline { display: block; overflow: hidden; margin-top: 2px; color: #9ba4b3; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
     .cue-row.active .cue-headline { color: #d1dfff; }
+    .cue-chevron { width: 13px; height: 13px; color: #a4afc0; transition: transform .16s ease; }
+    .cue-row.expanded .cue-chevron { transform: rotate(180deg); color: #fff; }
+    .cue-name.is-dirty::after { display: inline-block; width: 5px; height: 5px; margin: 0 0 1px 6px; border-radius: 50%; background: #e7ba6f; content: ""; }
     .cue-row .icon-button { color: #bec8d8; }
     .cue-row.active .icon-button { color: #fff; }
     .cue-row .icon-button:hover { background: rgba(255,255,255,.17); border-color: rgba(255,255,255,.3); }
+    .cue-editor { padding: 11px 10px 10px; border: 1px solid #526da4; border-top: 0; border-radius: 0 0 4px 4px; background: #252c3b; box-shadow: 0 7px 15px rgba(0,0,0,.15); }
+    .editor-field { display: block; margin-bottom: 9px; color: #aeb9ca; }
+    .editor-field > span, .support-head > span { display: block; margin-bottom: 4px; color: #a9b5c8; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .editor-field input, .editor-field select, .support-row input { width: 100%; min-width: 0; height: 29px; padding: 0 8px; border: 1px solid #536073; border-radius: 3px; background: #1e2430; color: #f4f7fc; font-size: 11px; }
+    .editor-field input:focus, .editor-field select:focus, .support-row input:focus { border-color: #83aaff; outline: none; box-shadow: 0 0 0 1px #83aaff; }
+    .support-head { display: flex; align-items: center; justify-content: space-between; margin: 0 0 4px; }
+    .support-head > span { margin: 0; }
+    .support-head .icon-button { width: 24px; height: 24px; }
+    .support-row { display: grid; grid-template-columns: minmax(0,1fr) 26px; gap: 3px; align-items: center; margin-bottom: 4px; }
+    .support-row .icon-button { width: 24px; height: 24px; color: #c7a4a9; }
+    .support-empty { margin: 2px 0 8px; color: #8692a4; font-size: 10px; }
+    .editor-actions { position: sticky; bottom: -10px; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 7px; margin: 3px -10px -10px; padding: 8px 10px; border-top: 1px solid #45536a; background: #252c3b; }
+    .editor-hint { color: #8f9db0; font-size: 10px; line-height: 1.2; }
+    .save-button { display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 9px; border: 1px solid #6c93e2; border-radius: 3px; background: #305bb6; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: .08em; white-space: nowrap; }
+    .save-button:hover { background: #3f6ed0; }
+    .save-button .icon { width: 14px; height: 14px; }
     .empty { margin: 16px 7px; padding: 14px; border: 1px dashed #515866; border-radius: 4px; color: var(--muted); font-size: 11px; line-height: 1.5; text-align: center; }
 
     .footer { display: flex; align-items: center; gap: 3px; min-height: 42px; padding: 5px 8px; border-top: 1px solid var(--line); background: #272a32; }
@@ -102,6 +126,10 @@
     <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.8 9A7 7 0 0 1 18.5 7L20 12M4 12l1.5 5A7 7 0 0 0 18.2 15"/></symbol>
     <symbol id="icon-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="#272a32"/><circle cx="15" cy="17" r="2" fill="#272a32"/></symbol>
     <symbol id="icon-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 10v7M14 10v7"/></symbol>
+    <symbol id="icon-save" viewBox="0 0 24 24"><path d="M4 4h13l3 3v13H4zM7 4v6h9V4M7 20v-7h10v7"/></symbol>
   </svg>
 
   <div class="dock">
@@ -141,6 +169,8 @@
     let online = false;
     let renderedOnce = false;
     let lastSignature = "";
+    let expandedCueId = "";
+    const drafts = new Map();
     let toastTimer;
     let refreshSerial = 0;
 
@@ -164,6 +194,143 @@
       connection.className = `connection ${online ? "online" : "offline"}`;
       connection.setAttribute("aria-label", online ? "Connected" : "Disconnected");
       connection.title = online ? "Connected to local server" : "Disconnected from local server";
+    }
+    function getDraft(cue) {
+      let draft = drafts.get(cue.id);
+      if (!draft || (!draft.dirty && draft.savedAt !== cue.savedAt)) {
+        draft = {
+          savedAt: cue.savedAt,
+          name: cue.name,
+          label: cue.settings?.label || "",
+          headline: cue.settings?.headline || "",
+          supportingLines: [...(cue.settings?.supportingLines || [])],
+          supportingInterval: cue.settings?.supportingInterval || 7,
+          dirty: false
+        };
+        drafts.set(cue.id, draft);
+      }
+      return draft;
+    }
+    function markDirty(id) {
+      const draft = drafts.get(id);
+      if (!draft) return;
+      draft.dirty = true;
+      const item = document.getElementById(`cue-${id}`);
+      item?.querySelector(".cue-name")?.classList.add("is-dirty");
+      const hint = item?.querySelector(".editor-hint");
+      if (hint) hint.textContent = "Unsaved changes";
+    }
+    function editorField(cue, draft, label, key, maxLength) {
+      const wrap = document.createElement("label");
+      wrap.className = "editor-field";
+      const caption = document.createElement("span");
+      caption.textContent = label;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.maxLength = maxLength;
+      input.value = draft[key];
+      input.addEventListener("input", () => { draft[key] = input.value; markDirty(cue.id); });
+      wrap.append(caption, input);
+      return wrap;
+    }
+    function makeEditor(cue, draft) {
+      const form = document.createElement("form");
+      form.className = "cue-editor";
+      form.id = `editor-${cue.id}`;
+      form.setAttribute("aria-label", `Edit ${cue.name}`);
+      form.addEventListener("submit", event => { event.preventDefault(); saveCue(cue.id); });
+      form.append(
+        editorField(cue, draft, "Cue name", "name", 80),
+        editorField(cue, draft, "Top label", "label", 48),
+        editorField(cue, draft, "Headline", "headline", 180)
+      );
+      const supportHead = document.createElement("div");
+      supportHead.className = "support-head";
+      const supportLabel = document.createElement("span");
+      supportLabel.textContent = `Supporting lines · ${draft.supportingLines.length}/4`;
+      const add = document.createElement("button");
+      add.type = "button";
+      add.className = "icon-button";
+      add.setAttribute("aria-label", "Add supporting line");
+      add.title = "Add supporting line";
+      add.dataset.tip = "Add line";
+      add.disabled = busy || draft.supportingLines.length >= 4;
+      add.appendChild(icon("plus"));
+      add.addEventListener("click", () => {
+        draft.supportingLines.push("");
+        markDirty(cue.id);
+        render();
+        const fields = document.querySelectorAll(`#editor-${cue.id} .support-row input`);
+        fields[fields.length - 1]?.focus({ preventScroll: true });
+      });
+      supportHead.append(supportLabel, add);
+      form.appendChild(supportHead);
+      if (!draft.supportingLines.length) {
+        const empty = document.createElement("p");
+        empty.className = "support-empty";
+        empty.textContent = "No supporting lines in this cue.";
+        form.appendChild(empty);
+      }
+      draft.supportingLines.forEach((value, index) => {
+        const row = document.createElement("div");
+        row.className = "support-row";
+        const input = document.createElement("input");
+        input.type = "text";
+        input.maxLength = 220;
+        input.placeholder = `Line ${index + 1}`;
+        input.setAttribute("aria-label", `Supporting line ${index + 1}`);
+        input.value = value;
+        input.addEventListener("input", () => { draft.supportingLines[index] = input.value; markDirty(cue.id); });
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "icon-button";
+        remove.setAttribute("aria-label", `Remove supporting line ${index + 1}`);
+        remove.title = `Remove supporting line ${index + 1}`;
+        remove.dataset.tip = "Remove line";
+        remove.disabled = busy;
+        remove.appendChild(icon("trash"));
+        remove.addEventListener("click", () => { draft.supportingLines.splice(index, 1); markDirty(cue.id); render(); });
+        row.append(input, remove);
+        form.appendChild(row);
+      });
+      const interval = document.createElement("label");
+      interval.className = "editor-field";
+      const intervalLabel = document.createElement("span");
+      intervalLabel.textContent = "Rotate lines every";
+      const select = document.createElement("select");
+      for (const seconds of [5, 7, 10]) {
+        const option = document.createElement("option");
+        option.value = String(seconds);
+        option.textContent = `${seconds} seconds`;
+        select.appendChild(option);
+      }
+      select.value = String(draft.supportingInterval);
+      select.addEventListener("change", () => { draft.supportingInterval = Number(select.value); markDirty(cue.id); });
+      interval.append(intervalLabel, select);
+      form.appendChild(interval);
+      const actions = document.createElement("div");
+      actions.className = "editor-actions";
+      const hint = document.createElement("span");
+      hint.className = "editor-hint";
+      hint.textContent = draft.dirty ? "Unsaved changes" : "Save, then play live";
+      const save = document.createElement("button");
+      save.type = "submit";
+      save.className = "save-button";
+      save.disabled = busy || !online;
+      save.title = "Save this cue";
+      save.append(icon("save"), document.createTextNode("SAVE"));
+      actions.append(hint, save);
+      form.appendChild(actions);
+      return form;
+    }
+    function toggleCue(id) {
+      expandedCueId = expandedCueId === id ? "" : id;
+      render();
+      if (expandedCueId) {
+        const item = document.getElementById(`cue-${id}`);
+        item?.querySelector(".cue-row")?.scrollIntoView({ block: "start" });
+        item?.querySelector(".cue-editor input")?.focus({ preventScroll: true });
+      }
     }
     function render() {
       if (liveState) {
@@ -194,21 +361,37 @@
         return;
       }
       for (const cue of visibleCues) {
+        const item = document.createElement("div");
+        item.className = "cue-item";
+        item.id = `cue-${cue.id}`;
         const row = document.createElement("div");
         const active = cue.id === liveState?.activeCueId;
-        row.className = `cue-row${active ? " active" : ""}`;
+        const expanded = cue.id === expandedCueId;
+        const draft = getDraft(cue);
+        row.className = `cue-row${active ? " active" : ""}${expanded ? " expanded" : ""}`;
         if (active) row.setAttribute("aria-current", "true");
+        const open = document.createElement("button");
+        open.className = "cue-open";
+        open.type = "button";
+        open.setAttribute("aria-label", `${expanded ? "Close" : "View and edit"} ${cue.name}`);
+        open.setAttribute("aria-expanded", String(expanded));
+        open.setAttribute("aria-controls", `editor-${cue.id}`);
+        open.title = expanded ? "Close cue editor" : "View and edit cue";
+        open.addEventListener("click", () => toggleCue(cue.id));
         const symbol = icon("broadcast");
         symbol.classList.add("cue-symbol");
         const copy = document.createElement("div");
         copy.className = "cue-copy";
         const name = document.createElement("span");
-        name.className = "cue-name";
+        name.className = `cue-name${draft.dirty ? " is-dirty" : ""}`;
         name.textContent = cue.name;
         const headline = document.createElement("span");
         headline.className = "cue-headline";
         headline.textContent = cue.settings?.headline || "No headline";
         copy.append(name, headline);
+        const chevron = icon("chevron");
+        chevron.classList.add("cue-chevron");
+        open.append(symbol, copy, chevron);
         const play = document.createElement("button");
         play.className = "icon-button";
         play.type = "button";
@@ -217,9 +400,11 @@
         play.dataset.tip = "Play live";
         play.disabled = busy || !online;
         play.appendChild(icon("play"));
-        play.addEventListener("click", () => playCue(cue.id, cue.name));
-        row.append(symbol, copy, play);
-        cueList.appendChild(row);
+        play.addEventListener("click", () => playCue(cue.id));
+        row.append(open, play);
+        item.appendChild(row);
+        if (expanded) item.appendChild(makeEditor(cue, draft));
+        cueList.appendChild(item);
       }
       cueList.scrollTop = previousScroll;
       if (!renderedOnce) {
@@ -271,13 +456,41 @@
       catch (error) { showToast(error.message, true); }
       finally { busy = false; render(); }
     }
-    function playCue(id, name) {
+    async function persistDraft(id) {
+      const cue = cues.find(item => item.id === id);
+      if (!cue) throw new Error("Saved cue not found");
+      const draft = getDraft(cue);
+      if (!draft.dirty) return cue;
+      const result = await post("/api/cues/save", {
+        id,
+        name: draft.name.trim(),
+        settings: {
+          label: draft.label.trim(),
+          headline: draft.headline.trim(),
+          supportingLines: draft.supportingLines.map(line => line.trim()).filter(Boolean),
+          supportingInterval: Number(draft.supportingInterval)
+        }
+      });
+      cues = result.cues;
+      drafts.delete(id);
+      lastSignature = "";
+      return result.cue;
+    }
+    function saveCue(id) {
       runAction(async () => {
+        const cue = await persistDraft(id);
+        render();
+        showToast(cue.id === liveState?.activeCueId ? "Cue saved · press Play to update OBS" : `Saved ${cue.name}`);
+      });
+    }
+    function playCue(id) {
+      runAction(async () => {
+        const cue = await persistDraft(id);
         const state = await post("/api/activate", { id });
         liveState = state;
         lastSignature = "";
         render();
-        showToast(state.showOverlay === false ? `${name} loaded · overlay hidden` : `${name} is live`);
+        showToast(state.showOverlay === false ? `${cue.name} loaded · overlay hidden` : `${cue.name} is live`);
       });
     }
     visibilityButton.addEventListener("click", () => runAction(async () => {
