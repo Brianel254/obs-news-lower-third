@@ -12,7 +12,7 @@ python news-overlay-server.py --port 8080
 
 Keep the server running during the broadcast. Open the controls at `http://127.0.0.1:8080/news-controls.html`. Add `http://127.0.0.1:8080/news-lower-third.html?v=20261015-1` as an OBS Browser Source with width **1920** and height **1080**. If you choose another port, use that same port in both URLs.
 
-For compact controls inside OBS, add a Custom Browser Dock with URL `http://127.0.0.1:8080/news-obs-dock.html`. Click a cue row to expand and edit its name, label, headline, supporting lines and rotation interval. **Save** keeps the edits in the cue; the separate Play icon takes it live. Playing a cue with unsaved edits saves them first. The eye button shows or hides the entire overlay. Hover or focus on an icon to see its label. Use the gear icon to open the full editor.
+For compact controls inside OBS, add a Custom Browser Dock with URL `http://127.0.0.1:8080/news-obs-dock.html`. The top bar shows the live headline, a green dot when the overlay is on air, and an eye icon for visibility. Click a cue row to expand and edit its name, label, headline, supporting lines and rotation interval. **Save** keeps the edits in the cue; the separate Play icon takes it live. Playing a cue with unsaved edits saves them first. Hover or focus on an icon to see its label. Use the gear icon to open the full editor.
 
 ## Use
 

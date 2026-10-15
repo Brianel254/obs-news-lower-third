@@ -34,9 +34,10 @@
     .topbar { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 8px 0 11px; border-bottom: 1px solid var(--line); background: #272a33; }
     .mark { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid #7198ec; border-radius: 5px; color: #c9dcff; background: #284b96; box-shadow: inset 0 1px rgba(255,255,255,.18); }
     .mark .icon { width: 14px; height: 14px; stroke-width: 2.1; }
-    .brand { min-width: 0; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 11px; font-weight: 750; letter-spacing: .12em; }
+    .brand { min-width: 0; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; font-weight: 750; }
     .connection { display: block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; background: #a1a5af; box-shadow: 0 0 0 2px rgba(255,255,255,.055); }
     .connection.online { background: var(--green); box-shadow: 0 0 0 2px rgba(115,206,170,.14); }
+    .connection.hidden-air { background: #a1a5af; box-shadow: 0 0 0 2px rgba(255,255,255,.055); }
     .connection.offline { background: var(--red); box-shadow: 0 0 0 2px rgba(243,127,137,.14); }
 
     .icon-button { position: relative; display: grid; place-items: center; flex: none; width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #c4cad5; text-decoration: none; }
@@ -54,15 +55,6 @@
     .search { padding: 7px 9px; border-bottom: 1px solid var(--line); background: #252932; }
     .search input { width: 100%; height: 28px; padding: 0 9px; border: 1px solid #4d5564; border-radius: 3px; background: #191d25; color: var(--text); outline: none; }
     .search input::placeholder { color: #858f9f; }
-
-    .on-air { min-width: 0; padding: 13px 13px 12px; border-bottom: 1px solid var(--line); background: linear-gradient(110deg, #303b55 0%, #2a2d37 65%); }
-    .on-air-top { display: flex; align-items: center; gap: 6px; min-height: 13px; color: #a9c4fd; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
-    .air-pulse { width: 6px; height: 6px; border-radius: 50%; background: #86adff; box-shadow: 0 0 0 3px rgba(134,173,255,.13); }
-    .air-mode { margin-left: auto; color: #a5aab5; font-size: 9px; font-weight: 750; letter-spacing: .11em; }
-    .on-air.hidden-air .air-pulse { background: var(--red); box-shadow: 0 0 0 3px rgba(243,127,137,.1); }
-    .on-air.hidden-air .air-mode { color: #e9a0a7; }
-    .on-air h1 { margin: 9px 0 4px; overflow: hidden; color: #fff; font-size: 16px; font-weight: 730; letter-spacing: -.015em; line-height: 1.16; text-overflow: ellipsis; white-space: nowrap; }
-    .on-air p { margin: 0; overflow: hidden; color: #afb8ca; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 
     .list-head { display: flex; align-items: center; min-height: 31px; padding: 0 11px 0 13px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
     .list-head span:last-child { margin-left: auto; color: #8c97aa; font-variant-numeric: tabular-nums; }
@@ -112,7 +104,7 @@
     .footer-label { padding-right: 5px; color: #8893a3; font-size: 9px; font-weight: 800; letter-spacing: .12em; }
     .toast { position: absolute; right: 8px; bottom: 49px; left: 8px; z-index: 5; padding: 8px 10px; border: 1px solid #5c79b8; border-radius: 4px; background: #233960; color: #fff; font-size: 11px; line-height: 1.35; box-shadow: 0 8px 20px rgba(0,0,0,.35); }
     .toast.error { border-color: #92535b; background: #562d36; }
-    @media (max-width: 250px) { .brand { letter-spacing: .055em; } .on-air h1 { font-size: 14px; } }
+    @media (max-width: 250px) { .brand { font-size: 11px; } }
     @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
   </style>
 </head>
@@ -135,17 +127,12 @@
   <div class="dock">
     <header class="topbar">
       <span class="mark" aria-hidden="true"><svg class="icon"><use href="#icon-broadcast"/></svg></span>
-      <span class="brand">LOWER THIRD</span>
+      <span class="brand" id="live-headline" aria-live="polite" title="Connecting…">Connecting…</span>
       <span class="connection" id="connection" role="status" aria-label="Connecting" title="Connecting"></span>
       <button class="icon-button" id="search-toggle" type="button" aria-label="Search cues" aria-expanded="false" title="Search cues" data-tip="Search cues"><svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg></button>
       <button class="icon-button" id="visibility-toggle" type="button" aria-label="Hide overlay" aria-pressed="true" title="Hide overlay" data-tip="Hide overlay"><svg class="icon" aria-hidden="true"><use href="#icon-eye"/></svg></button>
     </header>
     <div class="search" id="search-panel" hidden><input id="search-input" type="search" placeholder="Filter saved cues…" aria-label="Filter saved cues" autocomplete="off"></div>
-    <section class="on-air" id="on-air" aria-label="Current live headline">
-      <div class="on-air-top"><span class="air-pulse" aria-hidden="true"></span>ON AIR<span class="air-mode" id="air-mode">CONNECTING</span></div>
-      <h1 id="live-headline">Connecting…</h1>
-      <p id="live-detail">Waiting for the local server</p>
-    </section>
     <div class="list-head"><span>SAVED CUES</span><span id="cue-count">—</span></div>
     <main class="cue-list" id="cue-list" aria-label="Saved headline cues"><div class="empty">Connecting to the local server…</div></main>
     <footer class="footer">
@@ -190,10 +177,12 @@
       toast.hidden = false;
       toastTimer = setTimeout(() => { toast.hidden = true; }, error ? 5500 : 3000);
     }
-    function setConnection(online) {
-      connection.className = `connection ${online ? "online" : "offline"}`;
-      connection.setAttribute("aria-label", online ? "Connected" : "Disconnected");
-      connection.title = online ? "Connected to local server" : "Disconnected from local server";
+    function setConnection(connected) {
+      const status = !connected ? "offline" : liveState?.showOverlay === false ? "hidden-air" : "online";
+      const label = status === "online" ? "On air" : status === "hidden-air" ? "Overlay hidden" : "Disconnected from local server";
+      connection.className = `connection ${status}`;
+      connection.setAttribute("aria-label", label);
+      connection.title = label;
     }
     function getDraft(cue) {
       let draft = drafts.get(cue.id);
@@ -335,11 +324,11 @@
     function render() {
       if (liveState) {
         const visible = liveState.showOverlay !== false;
-        document.getElementById("on-air").classList.toggle("hidden-air", !visible);
-        document.getElementById("air-mode").textContent = visible ? "VISIBLE" : "HIDDEN";
-        document.getElementById("live-headline").textContent = liveState.headline || "No headline";
-        const lines = Array.isArray(liveState.supportingLines) ? liveState.supportingLines.length : 0;
-        document.getElementById("live-detail").textContent = `${lines} supporting line${lines === 1 ? "" : "s"}${lines > 1 ? ` · ${liveState.supportingInterval || 7}s rotation` : ""}`;
+        const headline = liveState.headline || "No live headline";
+        const headlineNode = document.getElementById("live-headline");
+        headlineNode.textContent = headline;
+        headlineNode.title = headline;
+        setConnection(online);
         visibilityButton.replaceChildren(icon(visible ? "eye" : "eye-off"));
         visibilityButton.classList.toggle("visibility-off", !visible);
         visibilityButton.setAttribute("aria-pressed", String(visible));
@@ -439,7 +428,6 @@
         online = false;
         setConnection(false);
         render();
-        document.getElementById("air-mode").textContent = "OFFLINE";
         if (shouldNotify) showToast(error.message, true);
         return false;
       }
