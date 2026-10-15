@@ -104,16 +104,17 @@
 <body>
   <header class="masthead">
     <div class="brand"><div class="brand-mark">N</div><div><div class="eyebrow">On-air graphics / Control 01</div><h1>Broadcast Desk</h1></div></div>
-    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button primary" href="/news-lower-third.html?v=20261014-4" target="_blank" rel="noopener">Open overlay ↗</a></div>
+    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button" href="/news-obs-dock.html" target="_blank" rel="noopener">Open OBS dock ↗</a><a class="button primary" href="/news-lower-third.html?v=20261015-1" target="_blank" rel="noopener">Open overlay ↗</a></div>
   </header>
 
   <main class="layout">
     <section class="preview-column" aria-label="Live preview">
       <div class="section-heading"><h2>Output monitor</h2><div class="preview-toggle"><button type="button" data-preview="draft">Draft</button><button type="button" data-preview="live" class="active">Live output</button></div></div>
-      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261014-4" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261014-4" title="Draft lower-third preview"></iframe></div></div>
+      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261015-1" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261015-1" title="Draft lower-third preview"></iframe></div></div>
       <div class="on-air"><strong>ON AIR</strong><span id="on-air-headline">Connecting…</span><span class="on-air-detail" id="on-air-lines"></span></div>
       <div class="preview-foot"><span><strong>Preview your draft, then play it live.</strong><br>Keep the server window open during your broadcast.</span><span>Transparent in OBS<br>Dark backdrop here for preview</span></div>
       <div class="url"><div class="url-label">OBS Browser Source URL</div><code id="obs-url"></code><p class="note">Set the source width to 1920 and height to 1080. Update this URL once in OBS to load the new supporting lines and ticker list.</p></div>
+      <div class="url"><div class="url-label">OBS Custom Browser Dock URL</div><code id="dock-url"></code><p class="note">Use this page as a compact control dock inside OBS.</p></div>
     </section>
 
     <section class="controls" aria-label="Overlay controls">
@@ -187,6 +188,7 @@
 
       <div class="card"><h2>05 / Visibility</h2>
         <div class="toggles">
+          <label class="toggle"><input type="checkbox" data-core="showOverlay">Whole overlay</label>
           <label class="toggle"><input type="checkbox" data-core="showLive">LIVE clock</label>
           <label class="toggle"><input type="checkbox" data-core="showSeconds">Clock seconds</label>
           <label class="toggle"><input type="checkbox" data-core="showLabel">Top label</label>
@@ -201,8 +203,9 @@
 
   <script>
     const serviceOrigin = location.protocol === "file:" ? "http://127.0.0.1:8080" : location.origin;
-    const obsUrl = new URL("/news-lower-third.html?v=20261014-4", serviceOrigin).href;
+    const obsUrl = new URL("/news-lower-third.html?v=20261015-1", serviceOrigin).href;
     document.getElementById("obs-url").textContent = obsUrl;
+    document.getElementById("dock-url").textContent = new URL("/news-obs-dock.html", serviceOrigin).href;
     const status = document.getElementById("status");
     const storyFields = [...document.querySelectorAll("[data-story]")];
     const coreFields = [...document.querySelectorAll("[data-core]")];

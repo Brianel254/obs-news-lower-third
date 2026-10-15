@@ -36,7 +36,10 @@
       transform: translate(-50%, -50%) scale(var(--scale));
       transform-origin: center center;
       pointer-events: none;
+      opacity: 1;
+      transition: opacity .3s ease;
     }
+    #stage.is-off-air { opacity: 0; }
 
     .live-corner {
       position: absolute;
@@ -344,6 +347,7 @@
       tickerColor: "#ffffff",
       logoBg: "#38393d",
       showLive: true,
+      showOverlay: true,
       showLabel: true,
       showSubtitle: true,
       showTicker: true,
@@ -519,6 +523,7 @@
       if (storyChanged || playedLive || old.supportingInterval !== config.supportingInterval
           || old.showSubtitle !== config.showSubtitle) resetSupportingRotation();
       byId("clock-zone").textContent = config.zoneLabel;
+      byId("stage").classList.toggle("is-off-air", !config.showOverlay);
       liveCorner.classList.toggle("is-hidden", !config.showLive);
       byId("label").classList.toggle("is-hidden", !config.showLabel);
       subtitleFrame.classList.toggle("is-hidden", !config.showSubtitle || !config.supportingLines.length);

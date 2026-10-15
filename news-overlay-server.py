@@ -45,6 +45,7 @@ DEFAULTS = {
     "tickerColor": "#ffffff",
     "logoBg": "#38393d",
     "showLive": True,
+    "showOverlay": True,
     "showLabel": True,
     "showSubtitle": True,
     "showTicker": True,
@@ -76,7 +77,7 @@ COLORS = {
     "subtitleColor", "tickerColor", "logoBg",
 }
 BOOLEANS = {
-    "showLive", "showLabel", "showSubtitle", "showTicker", "showLogo", "showSeconds",
+    "showLive", "showOverlay", "showLabel", "showSubtitle", "showTicker", "showLogo", "showSeconds",
 }
 NUMBERS = {
     "tickerSeconds": (8, 180),
@@ -267,6 +268,7 @@ class Handler(BaseHTTPRequestHandler):
         files = {
             "/news-lower-third.html": (ROOT / "news-lower-third.html", "text/html; charset=utf-8"),
             "/news-controls.html": (ROOT / "news-controls.html", "text/html; charset=utf-8"),
+            "/news-obs-dock.html": (ROOT / "news-obs-dock.html", "text/html; charset=utf-8"),
             "/logo.png": (ROOT / "logo.png", "image/png"),
         }
         if path == "/media/logo":

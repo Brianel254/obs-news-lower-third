@@ -36,6 +36,9 @@ class OverlaySeparationTest(unittest.TestCase):
                                           "tickerItems": ["Shared one", "Shared two"]})
                 self.assertEqual(core["storyRevision"], 1)
                 self.assertEqual(core["ticker"], "Shared one ◆ Shared two")
+                hidden = post("/api/core", {"showOverlay": False})
+                self.assertFalse(hidden["showOverlay"])
+                self.assertEqual(hidden["storyRevision"], 1)
                 saved = post("/api/cues/save", {"name": "Evening lead", "settings": {
                     "headline": "EVENING LEAD", "supportingLines": ["One", "Two", "Three"],
                     "supportingInterval": 5, "tickerItems": ["Alpha", "Beta"],
@@ -50,11 +53,13 @@ class OverlaySeparationTest(unittest.TestCase):
                 self.assertEqual(state["supportingLines"], ["One", "Two", "Three"])
                 self.assertEqual(state["supportingInterval"], 5)
                 self.assertEqual(state["tickerItems"], ["Shared one", "Shared two"])
+                self.assertFalse(state["showOverlay"])
                 self.assertEqual(state["storyRevision"], 2)
                 reloaded = module.load_state()
                 self.assertEqual(reloaded["headline"], "EVENING LEAD")
                 self.assertEqual(reloaded["tickerItems"], ["Shared one", "Shared two"])
                 self.assertEqual(reloaded["supportingLines"], ["One", "Two", "Three"])
+                self.assertFalse(reloaded["showOverlay"])
             finally:
                 server.shutdown()
                 server.server_close()
