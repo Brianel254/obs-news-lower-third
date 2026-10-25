@@ -97,33 +97,49 @@
     .field select { width:100%; border:1px solid #444750; background:#111318; color:#fff; padding:11px 12px; font-size:14px; }
     .ticker-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
     .ticker-chips span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:6px 9px; border:1px solid #6f2933; background:#301b21; color:#f6dadd; font-size:11px; font-weight:700; }
+    .theme-grid { display:grid; gap:12px; }
+    .theme-card { display:grid; grid-template-columns:112px minmax(0,1fr); gap:15px; align-items:center; width:100%; padding:12px; border:1px solid #454a55; background:#13171f; color:#f5f6f8; text-align:left; }
+    .theme-card:hover { border-color:#aab2c1; background:#1c222d; }
+    .theme-card[aria-pressed="true"] { border-color:#ecb65d; box-shadow:inset 3px 0 #ecb65d; background:#242830; }
+    .theme-card strong { display:block; font-size:15px; letter-spacing:.02em; }
+    .theme-card small { display:block; margin-top:5px; color:#aeb4c0; font-size:12px; line-height:1.35; }
+    .theme-art { position:relative; display:block; height:64px; overflow:hidden; background:var(--art-bg); border:1px solid var(--art-line); }
+    .theme-art::before { content:""; position:absolute; left:8px; right:8px; bottom:10px; height:24px; border-left:4px solid var(--art-accent); background:var(--art-panel); box-shadow:0 -11px 0 -9px var(--art-accent); }
+    .theme-art::after { content:""; position:absolute; left:8px; right:8px; bottom:3px; height:5px; background:var(--art-accent); }
+    .theme-card[data-theme-option="church"] .theme-art::before { border:1px solid var(--art-accent); border-top:3px solid var(--art-accent); border-radius:7px 7px 0 0; }
+    .theme-card[data-theme-option="podcast"] .theme-art::before { border:2px solid var(--art-accent); border-left-width:5px; border-radius:10px 10px 0 0; }
+    .network-links { display:grid; gap:9px; margin-top:12px; }
+    .network-links a { display:block; padding:9px 11px; border:1px solid #454d59; color:#dce9ff; background:#202833; font:13px/1.45 Consolas,monospace; overflow-wrap:anywhere; }
+    .network-links a:hover { border-color:#8bb6ff; }
     @media (max-width:1000px) { .layout { grid-template-columns:1fr; } .preview-column { position:static; } }
-    @media (max-width:650px) { .masthead { align-items:flex-start; flex-direction:column; } .two,.color-grid { grid-template-columns:1fr; } .card { padding:20px; } }
+    @media (max-width:650px) { .masthead { align-items:flex-start; flex-direction:column; } .two,.color-grid { grid-template-columns:1fr; } .card { padding:20px; } .desk-tabs button { min-width:0; padding:13px 6px; font-size:10px; letter-spacing:.04em; } .theme-card { grid-template-columns:88px minmax(0,1fr); gap:10px; } }
   </style>
 </head>
 <body>
   <header class="masthead">
     <div class="brand"><div class="brand-mark">N</div><div><div class="eyebrow">On-air graphics / Control 01</div><h1>Broadcast Desk</h1></div></div>
-    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button" href="/news-obs-dock.html" target="_blank" rel="noopener">Open OBS dock ↗</a><a class="button primary" href="/news-lower-third.html?v=20261015-1" target="_blank" rel="noopener">Open overlay ↗</a></div>
+    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button" href="/news-obs-dock.html" target="_blank" rel="noopener">Open OBS dock ↗</a><a class="button primary" href="/news-lower-third.html?v=20261025-1" target="_blank" rel="noopener">Open overlay ↗</a></div>
   </header>
 
   <main class="layout">
     <section class="preview-column" aria-label="Live preview">
       <div class="section-heading"><h2>Output monitor</h2><div class="preview-toggle"><button type="button" data-preview="draft">Draft</button><button type="button" data-preview="live" class="active">Live output</button></div></div>
-      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261015-1" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261015-1" title="Draft lower-third preview"></iframe></div></div>
+      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261025-1" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261025-1" title="Draft lower-third preview"></iframe></div></div>
       <div class="on-air"><strong>ON AIR</strong><span id="on-air-headline">Connecting…</span><span class="on-air-detail" id="on-air-lines"></span></div>
       <div class="preview-foot"><span><strong>Preview your draft, then play it live.</strong><br>Keep the server window open during your broadcast.</span><span>Transparent in OBS<br>Dark backdrop here for preview</span></div>
       <div class="url"><div class="url-label">OBS Browser Source URL</div><code id="obs-url"></code><p class="note">Set the source width to 1920 and height to 1080. Update this URL once in OBS to load the new supporting lines and ticker list.</p></div>
       <div class="url"><div class="url-label">OBS Custom Browser Dock URL</div><code id="dock-url"></code><p class="note">Use this page as a compact control dock inside OBS.</p></div>
+      <div class="url"><div class="url-label">Controls on other devices</div><div class="network-links" id="network-links"><span class="note">Finding this computer's local network address…</span></div><p class="note">Open a link on a phone or computer connected to the same trusted network. Anyone who can reach this address can operate the overlay; do not forward this port to the internet.</p></div>
     </section>
 
     <section class="controls" aria-label="Overlay controls">
       <div class="desk-tabs" role="tablist" aria-label="Control areas">
         <button type="button" id="stories-tab" role="tab" aria-controls="stories-panel" aria-selected="true">Stories</button>
+        <button type="button" id="theme-tab" role="tab" aria-controls="theme-panel" aria-selected="false">News themes</button>
         <button type="button" id="core-tab" role="tab" aria-controls="core-panel" aria-selected="false">Broadcast settings</button>
       </div>
       <div class="tab-panel" id="stories-panel" role="tabpanel" aria-labelledby="stories-tab">
-      <p class="section-intro">Prepare each headline here. A saved story carries its label, headline and supporting lines. The ticker, logo and theme are shared in Broadcast settings.</p>
+      <p class="section-intro">Prepare each headline here. A saved story carries its label, headline and supporting lines. The ticker and logo are shared in Broadcast settings; the visual format is shared in News themes.</p>
       <div class="card"><h2>00 / Saved headline cues</h2>
         <label class="field"><span>Cue name</span><input id="cue-name" type="text" maxlength="80" placeholder="e.g. Opening headline"></label>
         <div class="action-row">
@@ -142,6 +158,19 @@
       </div>
 
       </div>
+      <div class="tab-panel" id="theme-panel" role="tabpanel" aria-labelledby="theme-tab" hidden>
+        <p class="section-intro">Choose a complete look for the live graphic. News keeps the current design; Church uses a warm serif layout; Podcast uses a dark studio layout. Your saved stories stay intact.</p>
+        <div class="card"><h2>Visual format</h2>
+          <input id="theme-choice" type="hidden" data-core="theme" value="news">
+          <div class="theme-grid" role="group" aria-label="Overlay themes">
+            <button class="theme-card" type="button" data-theme-option="news" aria-pressed="true" style="--art-bg:#34373e;--art-line:#555b65;--art-panel:#f4f4f4;--art-accent:#c90013"><span class="theme-art" aria-hidden="true"></span><span><strong>News</strong><small>Sharp red headline, angled tag and breaking ticker.</small></span></button>
+            <button class="theme-card" type="button" data-theme-option="church" aria-pressed="false" style="--art-bg:#11252c;--art-line:#786746;--art-panel:#20383c;--art-accent:#d8b879"><span class="theme-art" aria-hidden="true"></span><span><strong>Church</strong><small>Warm gold, serif headline and a calm service banner.</small></span></button>
+            <button class="theme-card" type="button" data-theme-option="podcast" aria-pressed="false" style="--art-bg:#101426;--art-line:#32635f;--art-panel:#1c2634;--art-accent:#47e1d1"><span class="theme-art" aria-hidden="true"></span><span><strong>Podcast</strong><small>Dark audio desk, neon accent and a mic style ticker.</small></span></button>
+          </div>
+          <div class="action-row"><button class="button primary" id="save-theme" type="button">Apply theme live</button></div>
+          <p class="note">Selecting a theme previews it. Apply theme live to save the format and its colors for every story. You can fine tune colors in Broadcast settings.</p>
+        </div>
+      </div>
       <div class="tab-panel" id="core-panel" role="tabpanel" aria-labelledby="core-tab" hidden>
       <p class="section-intro">These settings are shared by every story. Save them once and they update the live overlay without changing your saved headlines.</p>
       <div class="card"><h2>Shared broadcast settings</h2><button class="button primary" id="save-core" type="button">Save shared settings</button><p class="note">Applies to the live output immediately.</p></div>
@@ -157,7 +186,7 @@
         </div>
       </div>
 
-      <div class="card"><h2>03 / Theme</h2>
+      <div class="card"><h2>03 / Color palette</h2>
         <div class="presets">
           <button class="preset" type="button" data-preset="red" style="--swatch:#c90013">Classic red</button>
           <button class="preset" type="button" data-preset="blue" style="--swatch:#006acc">Studio blue</button>
@@ -203,7 +232,7 @@
 
   <script>
     const serviceOrigin = location.protocol === "file:" ? "http://127.0.0.1:8080" : location.origin;
-    const obsUrl = new URL("/news-lower-third.html?v=20261015-1", serviceOrigin).href;
+    const obsUrl = new URL("/news-lower-third.html?v=20261025-1", serviceOrigin).href;
     document.getElementById("obs-url").textContent = obsUrl;
     document.getElementById("dock-url").textContent = new URL("/news-obs-dock.html", serviceOrigin).href;
     const status = document.getElementById("status");
@@ -308,6 +337,7 @@
       const items = Array.isArray(state.tickerItems) ? state.tickerItems : (state.ticker || "").split(",");
       document.getElementById("ticker-input").value = items.join(", ");
       renderTickerChips();
+      updateThemeCards();
       updateOutputs();
       updateDraftPreview();
     }
@@ -330,7 +360,7 @@
     }
     function updateDraftPreview() {
       if (draftFrame.contentWindow) {
-        const draft = activeTab === "core" ? { ...liveState, ...collectCore() }
+        const draft = activeTab !== "stories" ? { ...liveState, ...collectCore() }
           : { ...liveState, ...collectStory() };
         draftFrame.contentWindow.postMessage({ type: "draft-state", state: draft }, serviceOrigin);
       }
@@ -368,14 +398,39 @@
     function showTab(name) {
       activeTab = name;
       document.getElementById("stories-panel").hidden = name !== "stories";
+      document.getElementById("theme-panel").hidden = name !== "theme";
       document.getElementById("core-panel").hidden = name !== "core";
       document.getElementById("stories-tab").setAttribute("aria-selected", String(name === "stories"));
+      document.getElementById("theme-tab").setAttribute("aria-selected", String(name === "theme"));
       document.getElementById("core-tab").setAttribute("aria-selected", String(name === "core"));
       updateDraftPreview();
       showPreview("draft");
     }
     document.getElementById("stories-tab").addEventListener("click", () => showTab("stories"));
+    document.getElementById("theme-tab").addEventListener("click", () => showTab("theme"));
     document.getElementById("core-tab").addEventListener("click", () => showTab("core"));
+    const themePalettes = {
+      news: {accent:"#c90013",accentDark:"#87000c",panelLight:"#ffffff",panelDark:"#b6b9bc",headlineColor:"#292a2d",subtitleColor:"#616367",tickerColor:"#ffffff",logoBg:"#38393d"},
+      church: {accent:"#d8b879",accentDark:"#5d4930",panelLight:"#193137",panelDark:"#0d2027",headlineColor:"#fff7e5",subtitleColor:"#e6cfa7",tickerColor:"#fff5dc",logoBg:"#273b3d"},
+      podcast: {accent:"#47e1d1",accentDark:"#3b4b9b",panelLight:"#17212f",panelDark:"#101526",headlineColor:"#f8f9ff",subtitleColor:"#a9f4e9",tickerColor:"#f8f9ff",logoBg:"#1c2347"}
+    };
+    function updateThemeCards() {
+      const selected = document.getElementById("theme-choice").value;
+      for (const button of document.querySelectorAll("[data-theme-option]")) {
+        button.setAttribute("aria-pressed", String(button.dataset.themeOption === selected));
+      }
+    }
+    for (const button of document.querySelectorAll("[data-theme-option]")) {
+      button.addEventListener("click", () => {
+        document.getElementById("theme-choice").value = button.dataset.themeOption;
+        for (const [key, value] of Object.entries(themePalettes[button.dataset.themeOption])) {
+          document.querySelector(`[data-core="${key}"]`).value = value;
+        }
+        updateThemeCards();
+        markDraft("core");
+        setStatus(`${button.dataset.themeOption} theme draft · apply to go live`, "ok");
+      });
+    }
     const presets = {
       red: {accent:"#c90013",accentDark:"#87000c",panelLight:"#ffffff",panelDark:"#b6b9bc",headlineColor:"#292a2d",subtitleColor:"#616367",tickerColor:"#ffffff",logoBg:"#38393d"},
       blue: {accent:"#006acc",accentDark:"#003a77",panelLight:"#ffffff",panelDark:"#b8c8d9",headlineColor:"#172337",subtitleColor:"#4b6176",tickerColor:"#ffffff",logoBg:"#102841"},
@@ -498,19 +553,21 @@
     }
     document.getElementById("save-cue").addEventListener("click", () => saveCue(false));
     document.getElementById("save-new").addEventListener("click", () => saveCue(true));
-    document.getElementById("save-core").addEventListener("click", () => {
+    function saveSharedSettings(fromTheme = false) {
       if (!ready) return;
       const settings = collectCore();
-      setStatus("Saving shared settings…");
+      setStatus(fromTheme ? "Applying theme…" : "Saving shared settings…");
       runAction(async () => {
         const state = await api("/api/core", settings);
         coreDirty = false;
         showLiveState(state);
         pushLivePreview(state);
         showPreview("live");
-        setStatus("Shared settings applied to every story", "ok");
+        setStatus(fromTheme ? `${settings.theme} theme is live` : "Shared settings applied to every story", "ok");
       });
-    });
+    }
+    document.getElementById("save-core").addEventListener("click", () => saveSharedSettings());
+    document.getElementById("save-theme").addEventListener("click", () => saveSharedSettings(true));
     document.getElementById("take-draft-live").addEventListener("click", () => {
       if (!ready) return;
       const settings = collectStory();
@@ -556,6 +613,29 @@
         setStatus("Connected · ready", "ok");
       } catch (error) { setStatus(error.message, "error"); }
     }
+    async function loadNetworkLinks() {
+      const list = document.getElementById("network-links");
+      try {
+        const network = await api("/api/network");
+        list.replaceChildren();
+        if (!network.addresses.length) {
+          const note = document.createElement("span");
+          note.className = "note";
+          note.textContent = "No local network address found. Connect this computer to Wi-Fi or Ethernet, then restart the server.";
+          list.appendChild(note);
+        }
+        for (const address of network.addresses) {
+          const link = document.createElement("a");
+          link.href = `http://${address}:${network.port}/news-controls.html`;
+          link.textContent = link.href;
+          link.title = "Open controls from another device on this network";
+          list.appendChild(link);
+        }
+      } catch (_) {
+        list.textContent = "Network addresses unavailable. Check the server window for its LAN controls link.";
+      }
+    }
+    loadNetworkLinks();
     initialize();
     setInterval(async () => {
       if (!ready) return;

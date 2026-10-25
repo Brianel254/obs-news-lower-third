@@ -7,6 +7,7 @@ import threading
 import unittest
 from http.server import ThreadingHTTPServer
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 
@@ -32,8 +33,9 @@ class OverlaySeparationTest(unittest.TestCase):
                     return json.load(response)
 
             try:
-                core = post("/api/core", {"accent": "#006acc", "logo": "station.png",
+                core = post("/api/core", {"theme": "church", "accent": "#006acc", "logo": "station.png",
                                           "tickerItems": ["Shared one", "Shared two"]})
+                self.assertEqual(core["theme"], "church")
                 self.assertEqual(core["storyRevision"], 1)
                 self.assertEqual(core["ticker"], "Shared one ◆ Shared two")
                 hidden = post("/api/core", {"showOverlay": False})
@@ -49,6 +51,7 @@ class OverlaySeparationTest(unittest.TestCase):
                 self.assertNotIn("tickerItems", saved["cue"]["settings"])
                 state = post("/api/activate", {"id": saved["cue"]["id"]})
                 self.assertEqual(state["accent"], "#006acc")
+                self.assertEqual(state["theme"], "church")
                 self.assertEqual(state["logo"], "station.png")
                 self.assertEqual(state["supportingLines"], ["One", "Two", "Three"])
                 self.assertEqual(state["supportingInterval"], 5)
@@ -57,6 +60,7 @@ class OverlaySeparationTest(unittest.TestCase):
                 self.assertEqual(state["storyRevision"], 2)
                 reloaded = module.load_state()
                 self.assertEqual(reloaded["headline"], "EVENING LEAD")
+                self.assertEqual(reloaded["theme"], "church")
                 self.assertEqual(reloaded["tickerItems"], ["Shared one", "Shared two"])
                 self.assertEqual(reloaded["supportingLines"], ["One", "Two", "Three"])
                 self.assertFalse(reloaded["showOverlay"])
@@ -73,9 +77,36 @@ class OverlaySeparationTest(unittest.TestCase):
                 self.assertEqual(replayed["supportingLines"], ["First", "Second"])
                 self.assertEqual(replayed["supportingInterval"], 10)
                 self.assertEqual(replayed["tickerItems"], ["Shared one", "Shared two"])
+                with self.assertRaises(HTTPError) as invalid:
+                    post("/api/core", {"theme": "unlisted"})
+                self.assertEqual(invalid.exception.code, 400)
             finally:
                 server.shutdown()
                 server.server_close()
+
+    def test_lan_host_and_same_origin_are_required(self):
+        spec = importlib.util.spec_from_file_location("overlay_server", Path(__file__).with_name("news-overlay-server.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        server = ThreadingHTTPServer(("127.0.0.1", 0), module.Handler)
+        server.allowed_hosts = {"127.0.0.1", "localhost", "192.168.1.8"}
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        base = f"http://127.0.0.1:{server.server_port}"
+        try:
+            host = f"192.168.1.8:{server.server_port}"
+            request = Request(base + "/api/state", headers={"Host": host, "Origin": f"http://{host}"})
+            with urlopen(request) as response:
+                self.assertIn("theme", json.load(response))
+            request = Request(base + "/api/state", headers={"Host": host, "Origin": "http://other.example"})
+            with self.assertRaises(HTTPError) as rejected:
+                urlopen(request)
+            self.assertEqual(rejected.exception.code, 403)
+            with urlopen(base + "/api/network") as response:
+                self.assertEqual(json.load(response)["port"], server.server_port)
+        finally:
+            server.shutdown()
+            server.server_close()
 
 
 if __name__ == "__main__":

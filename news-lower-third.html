@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>1080p News Lower Third</title>
+  <title>1080p Broadcast Lower Third</title>
   <style>
     :root {
       --accent: #c90013;
@@ -266,6 +266,66 @@
     .is-hidden { display: none !important; }
     .lower-third.no-ticker .main-panel { bottom: 0; }
 
+    /* Each format has its own silhouette, typography, clock, logo treatment and ticker. */
+    #stage[data-theme="church"] .lower-third { height: 218px; filter: drop-shadow(0 9px 24px rgba(2,14,20,.55)); }
+    #stage[data-theme="church"] .top-rule { top: 17px; height: 2px; background: var(--accent); }
+    #stage[data-theme="church"] .main-panel {
+      inset: 24px 0 42px; border: 1px solid color-mix(in srgb, var(--accent) 70%, white);
+      border-top: 4px solid var(--accent); border-radius: 18px 18px 4px 4px;
+      background: linear-gradient(110deg, var(--panel-light), var(--panel-dark));
+      box-shadow: inset 0 1px rgba(255,255,255,.12), 0 10px 30px rgba(0,0,0,.28);
+    }
+    #stage[data-theme="church"] .lower-third.no-ticker .main-panel { bottom: 0; }
+    #stage[data-theme="church"] .copy { padding: 34px 36px 11px 39px; }
+    #stage[data-theme="church"] .headline { font-family: Georgia, "Times New Roman", serif; font-size: 55px; font-weight: 700; letter-spacing: -.035em; }
+    #stage[data-theme="church"] .subtitle { font-family: Georgia, "Times New Roman", serif; font-size: 24px; font-style: italic; }
+    #stage[data-theme="church"] .breaking-label {
+      top: -5px; left: 25px; min-width: 215px; height: 37px; padding: 0 21px;
+      clip-path: none; border-radius: 4px 4px 0 0; background: var(--accent);
+      color: #18292b; font-family: Georgia, "Times New Roman", serif; font-size: 19px;
+      font-weight: 700; letter-spacing: .09em; text-shadow: none;
+    }
+    #stage[data-theme="church"] .logo-box { flex-basis: 214px; border-left: 1px solid var(--accent); background: radial-gradient(circle at 50% 40%, var(--logo-bg), #101f24 75%); box-shadow: none; }
+    #stage[data-theme="church"] .logo-box::before { width: 150px; height: 150px; border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+    #stage[data-theme="church"] .ticker { height: 42px; border-radius: 0 0 8px 8px; background: linear-gradient(90deg, var(--accent-dark), var(--logo-bg)); box-shadow: inset 0 1px var(--accent); }
+    #stage[data-theme="church"] .ticker-lead { background: var(--accent); color: #18292b; border-right: 0; font-family: Georgia, "Times New Roman", serif; letter-spacing: .04em; }
+    #stage[data-theme="church"] .ticker-separator { color: var(--accent); }
+    #stage[data-theme="church"] .live-label { border-radius: 4px 4px 0 0; background: var(--accent); color: #18292b; box-shadow: none; }
+    #stage[data-theme="church"] .live-dot { background: #18292b; box-shadow: 0 0 0 4px rgba(24,41,43,.16); }
+    #stage[data-theme="church"] .clock { background: #fff6e4; color: #18292b; }
+    #stage[data-theme="church"] .clock-zone { background: var(--logo-bg); border-bottom: 2px solid var(--accent); }
+    #stage[data-theme="church"] .copy::after { background: linear-gradient(90deg, transparent, var(--accent) 45%, #fff6e4 65%, transparent); opacity: .55; }
+
+    #stage[data-theme="podcast"] .lower-third { height: 205px; filter: drop-shadow(0 12px 26px rgba(0,0,0,.6)); }
+    #stage[data-theme="podcast"] .top-rule { top: 10px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-dark), var(--accent)); }
+    #stage[data-theme="podcast"] .main-panel {
+      inset: 18px 0 39px; border: 2px solid var(--accent); border-left-width: 8px;
+      border-radius: 22px 22px 0 0; background: linear-gradient(110deg, var(--panel-light), var(--panel-dark));
+      box-shadow: inset 0 1px rgba(255,255,255,.13), 0 10px 35px rgba(0,0,0,.32);
+    }
+    #stage[data-theme="podcast"] .lower-third.no-ticker .main-panel { bottom: 0; }
+    #stage[data-theme="podcast"] .copy { padding: 36px 34px 10px 35px; }
+    #stage[data-theme="podcast"] .headline { font-size: 55px; font-weight: 900; letter-spacing: -.04em; }
+    #stage[data-theme="podcast"] .subtitle { font-size: 24px; font-weight: 600; letter-spacing: .015em; }
+    #stage[data-theme="podcast"] .breaking-label {
+      top: -9px; left: 24px; min-width: 180px; height: 39px; padding: 0 24px;
+      clip-path: none; border-radius: 20px; background: var(--accent);
+      color: #13252b; font-size: 18px; font-weight: 900; letter-spacing: .1em; text-shadow: none;
+    }
+    #stage[data-theme="podcast"] .logo-box { flex-basis: 195px; border-left: 1px solid rgba(255,255,255,.16); background: radial-gradient(circle at center, var(--logo-bg), #101322 72%); box-shadow: none; }
+    #stage[data-theme="podcast"] .logo-box::before { width: 138px; height: 138px; border: 5px double var(--accent); box-shadow: 0 0 0 13px rgba(255,255,255,.035); }
+    #stage[data-theme="podcast"] .logo-box::after { content: ""; position: absolute; left: 30px; right: 30px; bottom: 9px; height: 13px; background: repeating-linear-gradient(90deg, var(--accent) 0 4px, transparent 4px 10px); opacity: .7; animation: pulse 1.5s ease-in-out infinite; }
+    #stage[data-theme="podcast"] .ticker { height: 39px; border-radius: 0 0 13px 13px; background: linear-gradient(90deg, var(--accent-dark), var(--logo-bg)); box-shadow: inset 0 1px var(--accent); }
+    #stage[data-theme="podcast"] .ticker-lead { background: var(--accent); color: #13252b; border-right: 0; border-radius: 0 0 0 12px; }
+    #stage[data-theme="podcast"] .ticker-separator { color: var(--accent); }
+    #stage[data-theme="podcast"] .live-label { border-radius: 22px 22px 0 0; background: var(--accent); color: #13252b; box-shadow: none; }
+    #stage[data-theme="podcast"] .live-dot { background: #13252b; box-shadow: 0 0 0 4px rgba(19,37,43,.15); }
+    #stage[data-theme="podcast"] .clock { background: var(--panel-light); color: var(--headline-color); }
+    #stage[data-theme="podcast"] .clock-zone { background: var(--logo-bg); border-bottom: 2px solid var(--accent); }
+    #stage[data-theme="podcast"] .copy::after { background: linear-gradient(90deg, var(--accent-dark), var(--accent), transparent); }
+    .lower-third.theme-switch { animation: theme-enter .85s cubic-bezier(.16,.84,.24,1) both; }
+    .live-corner.theme-switch { animation: theme-clock-enter .7s cubic-bezier(.16,.84,.24,1) both; }
+
     @keyframes panel-in { from { opacity: 0; transform: translateX(-95px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes label-in { from { opacity: 0; transform: translateX(-80px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes corner-in { from { opacity: 0; transform: translateY(-28px); } to { opacity: 1; transform: translateY(0); } }
@@ -292,6 +352,12 @@
       from { opacity: 0; transform: perspective(600px) rotateX(88deg); }
       to { opacity: 1; transform: perspective(600px) rotateX(0); }
     }
+    @keyframes theme-enter { from { opacity: 0; transform: translateY(70px) scale(.97); filter: blur(6px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+    @keyframes theme-clock-enter { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes church-headline-out { to { opacity: 0; transform: translateY(-38px); filter: blur(5px); } }
+    @keyframes church-headline-in { from { opacity: 0; transform: translateY(42px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+    @keyframes podcast-headline-out { to { opacity: 0; transform: translateX(-145px) scale(.88); } }
+    @keyframes podcast-headline-in { from { opacity: 0; transform: translateX(155px) scale(1.08); } to { opacity: 1; transform: translateX(0) scale(1); } }
     @keyframes pulse { 50% { opacity: .55; box-shadow: 0 0 0 7px rgba(255,255,255,.08); } }
     @keyframes crawl { to { transform: translateX(-50%); } }
   </style>
@@ -327,6 +393,7 @@
     // These defaults work when opened as a local file. The control page overrides
     // them automatically when both pages are served by news-overlay-server.py.
     const defaults = {
+      theme: "news",
       label: "BREAKING NEWS",
       headline: "YOUR HEADLINE HERE",
       subtitle: "Your supporting line stays on screen",
@@ -369,6 +436,7 @@
     if (params.has("tickerSeconds")) config.tickerSeconds = Number(params.get("tickerSeconds")) || 34;
     const byId = id => document.getElementById(id);
     const root = document.documentElement;
+    const stage = byId("stage");
     const lowerThird = document.querySelector(".lower-third");
     const liveCorner = document.querySelector(".live-corner");
     const ticker = document.querySelector(".ticker");
@@ -387,6 +455,7 @@
     let supportFlipGhost = null;
     let supportingRotationTimer = null;
     let supportingIndex = 0;
+    let themeSwitchTimer = null;
     function clearSupportingFlip() {
       clearTimeout(supportFlipTimer);
       if (supportFlipGhost) supportFlipGhost.remove();
@@ -442,18 +511,27 @@
       outgoingHeadline = headlineElement.cloneNode(true);
       outgoingHeadline.removeAttribute("id");
       outgoingHeadline.classList.add("headline-ghost");
-      outgoingHeadline.style.animation = "headline-exit .75s cubic-bezier(.55,.05,.68,.19) both";
+      const exitMotion = config.theme === "church" ? "church-headline-out .72s ease-in both"
+        : config.theme === "podcast" ? "podcast-headline-out .72s cubic-bezier(.55,.05,.68,.19) both"
+        : "headline-exit .75s cubic-bezier(.55,.05,.68,.19) both";
+      const enterMotion = config.theme === "church" ? "church-headline-in .78s .78s ease-out both"
+        : config.theme === "podcast" ? "podcast-headline-in .72s .8s cubic-bezier(.16,.8,.24,1) both"
+        : "headline-entrance .72s .82s cubic-bezier(.16,.8,.24,1) both";
+      const subtitleEnterMotion = config.theme === "church" ? "church-headline-in .78s .86s ease-out both"
+        : config.theme === "podcast" ? "podcast-headline-in .72s .88s cubic-bezier(.16,.8,.24,1) both"
+        : "headline-entrance .72s .9s cubic-bezier(.16,.8,.24,1) both";
+      outgoingHeadline.style.animation = exitMotion;
       headlineFrame.appendChild(outgoingHeadline);
       outgoingSubtitle = subtitleElement.cloneNode(true);
       outgoingSubtitle.removeAttribute("id");
       outgoingSubtitle.classList.add("subtitle-ghost");
-      outgoingSubtitle.style.animation = "headline-exit .75s cubic-bezier(.55,.05,.68,.19) both";
+      outgoingSubtitle.style.animation = exitMotion;
       subtitleFrame.appendChild(outgoingSubtitle);
       headlineElement.textContent = headline;
       subtitleElement.textContent = subtitle;
       void headlineElement.offsetWidth;
-      headlineElement.style.animation = "headline-entrance .72s .82s cubic-bezier(.16,.8,.24,1) both";
-      subtitleElement.style.animation = "headline-entrance .72s .9s cubic-bezier(.16,.8,.24,1) both";
+      headlineElement.style.animation = enterMotion;
+      subtitleElement.style.animation = subtitleEnterMotion;
       copyPanel.classList.add("is-transitioning");
       storyFinishTimer = setTimeout(clearStoryTransition, 1800);
     }
@@ -502,6 +580,24 @@
     function applyState(next) {
       const old = config;
       config = { ...defaults, ...next };
+      config.theme = ["news", "church", "podcast"].includes(config.theme) ? config.theme : "news";
+      stage.dataset.theme = config.theme;
+      if (old.theme && old.theme !== config.theme) {
+        clearTimeout(themeSwitchTimer);
+        lowerThird.style.animation = "";
+        liveCorner.style.animation = "";
+        lowerThird.classList.remove("theme-switch");
+        liveCorner.classList.remove("theme-switch");
+        void lowerThird.offsetWidth;
+        lowerThird.classList.add("theme-switch");
+        liveCorner.classList.add("theme-switch");
+        themeSwitchTimer = setTimeout(() => {
+          lowerThird.classList.remove("theme-switch");
+          liveCorner.classList.remove("theme-switch");
+          lowerThird.style.animation = "none";
+          liveCorner.style.animation = "none";
+        }, 950);
+      }
       config.supportingLines = Array.isArray(next.supportingLines) ? next.supportingLines
         : (next.subtitle ? [next.subtitle] : []);
       config.tickerItems = Array.isArray(next.tickerItems) ? next.tickerItems
@@ -511,7 +607,10 @@
       root.style.setProperty("--side-inset", `${config.sideInset}px`);
       root.style.setProperty("--corner-top", `${config.cornerTop}px`);
       root.style.setProperty("--corner-left", `${config.cornerLeft}px`);
-      byId("label").textContent = config.label;
+      byId("label").textContent = config.label === "BREAKING NEWS" && config.theme !== "news"
+        ? (config.theme === "church" ? "CHURCH LIVE" : "PODCAST LIVE") : config.label;
+      document.querySelector(".ticker-lead").textContent = config.theme === "church" ? "SERVICE"
+        : config.theme === "podcast" ? "ON THE MIC" : "LATEST";
       const linesChanged = JSON.stringify(old.supportingLines) !== JSON.stringify(config.supportingLines);
       const storyChanged = old.headline !== config.headline || linesChanged;
       const playedLive = Number.isInteger(old.storyRevision) && Number.isInteger(config.storyRevision)

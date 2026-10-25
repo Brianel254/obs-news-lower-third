@@ -1,11 +1,13 @@
-"""Local-only control server for the OBS news lower third. No packages needed."""
+"""OBS lower-third control server for this computer and its local network."""
 
 from __future__ import annotations
 
 import json
 import argparse
+import ipaddress
 import os
 import re
+import socket
 import threading
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -19,11 +21,12 @@ STATE_FILE = ROOT / "news-overlay-state.json"
 LOGO_FILE = ROOT / "news-logo-upload.bin"
 LOGO_DIR = ROOT / "news-logos"
 CUES_FILE = ROOT / "news-overlay-cues.json"
-HOST = "127.0.0.1"
+DEFAULT_HOST = os.environ.get("NEWS_OVERLAY_HOST", "0.0.0.0")
 DEFAULT_PORT = int(os.environ.get("NEWS_OVERLAY_PORT", "8080"))
 LOCK = threading.Lock()
 
 DEFAULTS = {
+    "theme": "news",
     "label": "BREAKING NEWS",
     "headline": "YOUR HEADLINE HERE",
     "subtitle": "Your supporting line stays on screen",
@@ -89,6 +92,10 @@ NUMBERS = {
 
 
 def checked_value(key: str, value: object) -> object:
+    if key == "theme":
+        if value not in {"news", "church", "podcast"}:
+            raise ValueError("Theme must be news, church or podcast")
+        return value
     if key == "supportingLines":
         if not isinstance(value, list) or len(value) > 4 or any(
             not isinstance(item, str) or not item.strip() or len(item) > 220 for item in value
@@ -209,13 +216,33 @@ def with_legacy_copy(state: dict) -> dict:
 CUES = load_cues()
 
 
+def network_ipv4_addresses() -> list[str]:
+    """Find private IPv4 addresses that another device on the LAN can open."""
+    addresses = set()
+    try:
+        for address in socket.gethostbyname_ex(socket.gethostname())[2]:
+            addresses.add(address)
+        for item in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            addresses.add(item[4][0])
+    except OSError:
+        pass
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+            probe.connect(("8.8.8.8", 80))  # Selects a local interface; sends no packet.
+            addresses.add(probe.getsockname()[0])
+    except OSError:
+        pass
+    return sorted(address for address in addresses if (
+        (ip := ipaddress.ip_address(address)).is_private
+        and not ip.is_loopback and not ip.is_link_local and not ip.is_unspecified
+    ))
+
+
 class Handler(BaseHTTPRequestHandler):
     def allowed_request(self) -> bool:
-        allowed = {
-            f"127.0.0.1:{self.server.server_port}",
-            f"localhost:{self.server.server_port}",
-        }
-        host = self.headers.get("Host", "")
+        names = getattr(self.server, "allowed_hosts", {"127.0.0.1", "localhost"})
+        allowed = {f"{name}:{self.server.server_port}" for name in names}
+        host = self.headers.get("Host", "").lower()
         origin = self.headers.get("Origin")
         return host in allowed and (origin is None or origin in {f"http://{name}" for name in allowed})
 
@@ -252,6 +279,10 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/cues":
             with LOCK:
                 self.send_json({"cues": CUES.copy()})
+            return
+        if path == "/api/network":
+            addresses = network_ipv4_addresses() if self.server.server_address[0] != "127.0.0.1" else []
+            self.send_json({"port": self.server.server_port, "addresses": addresses})
             return
         if path.startswith("/media/logo/"):
             name = path.removeprefix("/media/logo/")
@@ -394,14 +425,21 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Local OBS lower-third control server")
-    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Local port (default: 8080)")
+    parser = argparse.ArgumentParser(description="OBS lower-third control server")
+    parser.add_argument("--host", default=DEFAULT_HOST, help="Bind address (default: 0.0.0.0 for local network)")
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Port (default: 8080)")
     args = parser.parse_args()
     try:
-        server = ThreadingHTTPServer((HOST, args.port), Handler)
+        server = ThreadingHTTPServer((args.host, args.port), Handler)
+        addresses = network_ipv4_addresses() if args.host != "127.0.0.1" else []
+        server.allowed_hosts = {"127.0.0.1", "localhost", *addresses}
+        if args.host not in {"0.0.0.0", "127.0.0.1"}:
+            server.allowed_hosts.add(args.host)
         actual_port = server.server_port
-        print(f"Control page: http://{HOST}:{actual_port}/news-controls.html")
-        print(f"OBS source:   http://{HOST}:{actual_port}/news-lower-third.html")
+        print(f"Control page: http://127.0.0.1:{actual_port}/news-controls.html")
+        print(f"OBS source:   http://127.0.0.1:{actual_port}/news-lower-third.html")
+        for address in addresses:
+            print(f"LAN controls: http://{address}:{actual_port}/news-controls.html")
         print("Keep this window open while streaming. Press Ctrl+C to stop.")
         server.serve_forever()
     except KeyboardInterrupt:
