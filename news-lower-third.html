@@ -99,6 +99,7 @@
 
     .lower-third {
       position: absolute;
+      z-index: 6;
       left: var(--side-inset);
       right: var(--side-inset);
       bottom: var(--bottom-offset);
@@ -356,7 +357,7 @@
     @keyframes verse-copy-in { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
     @keyframes verse-text-change { 0% { opacity:0; transform:translateY(16px); filter:blur(4px); } 100% { opacity:1; transform:translateY(0); filter:blur(0); } }
     #stage:not([data-theme="church"]) .verse-card { display:none; }
-    .pastor-portrait { display:none; position:absolute; z-index:5; left:44px; bottom:calc(var(--bottom-offset) + 125px); height:300px; max-width:300px; object-fit:contain; object-position:left bottom; filter:drop-shadow(0 10px 9px rgba(14,4,61,.34)); pointer-events:none; }
+    .pastor-portrait { display:none; position:absolute; z-index:3; left:44px; bottom:calc(var(--bottom-offset) + 125px); height:300px; max-width:300px; object-fit:contain; object-position:left bottom; filter:drop-shadow(0 10px 9px rgba(14,4,61,.34)); pointer-events:none; }
     #stage[data-theme="church"] .pastor-portrait.has-image { display:block; }
 
     #stage[data-theme="podcast"] .lower-third { height: 205px; filter: drop-shadow(0 12px 26px rgba(0,0,0,.6)); }
