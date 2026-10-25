@@ -128,6 +128,16 @@
     .speaker-option[data-speaker-template="3"] .speaker-art i { background:#191b20; color:#fff; padding:3px 6px; border-left:3px solid var(--red); }
     .speaker-option[data-speaker-template="4"] .speaker-art b { color:#fff; text-shadow:0 2px 4px #000; }
     .speaker-option[data-speaker-template="4"] .speaker-art i { background:var(--red); color:#fff; padding:3px 6px; }
+    .verse-search-wrap { position:relative; }
+    .verse-suggestions { display:grid; gap:3px; margin-top:6px; max-height:270px; overflow-y:auto; }
+    .verse-suggestions:empty { display:none; }
+    .verse-suggestion { display:block; width:100%; padding:10px 12px; border:1px solid #434656; background:#151922; color:#f5f5f8; text-align:left; }
+    .verse-suggestion:hover,.verse-suggestion:focus-visible { border-color:#e4c767; background:#26283a; }
+    .verse-suggestion strong { display:block; font-size:13px; }
+    .verse-suggestion small { display:block; margin-top:4px; color:#aeb4c1; font-size:11px; line-height:1.35; }
+    .verse-selection { margin-top:15px; padding:14px 16px; border-left:3px solid #e8c758; background:linear-gradient(110deg,#251e3f,#171627); }
+    .verse-selection strong { color:#f2d36b; font-size:13px; letter-spacing:.04em; }
+    .verse-selection p { margin:7px 0 0; color:#f5f3fa; font-size:14px; line-height:1.5; }
     @media (max-width:1000px) { .layout { grid-template-columns:1fr; } .preview-column { position:static; } }
     @media (max-width:650px) { .masthead { align-items:flex-start; flex-direction:column; } .two,.color-grid { grid-template-columns:1fr; } .card { padding:20px; } .desk-tabs button { min-width:0; padding:13px 6px; font-size:10px; letter-spacing:.04em; } .theme-card { grid-template-columns:88px minmax(0,1fr); gap:10px; } }
     @media (max-width:420px) { .speaker-grid { grid-template-columns:1fr; } }
@@ -136,13 +146,13 @@
 <body>
   <header class="masthead">
     <div class="brand"><div class="brand-mark">N</div><div><div class="eyebrow">On-air graphics / Control 01</div><h1>Broadcast Desk</h1></div></div>
-    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button" href="/news-obs-dock.html" target="_blank" rel="noopener">Open OBS dock ↗</a><a class="button primary" href="/news-lower-third.html?v=20261025-2" target="_blank" rel="noopener">Open overlay ↗</a></div>
+    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button" href="/news-obs-dock.html" target="_blank" rel="noopener">Open OBS dock ↗</a><a class="button primary" href="/news-lower-third.html?v=20261025-3" target="_blank" rel="noopener">Open overlay ↗</a></div>
   </header>
 
   <main class="layout">
     <section class="preview-column" aria-label="Live preview">
       <div class="section-heading"><h2>Output monitor</h2><div class="preview-toggle"><button type="button" data-preview="draft">Draft</button><button type="button" data-preview="live" class="active">Live output</button></div></div>
-      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261025-2" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261025-2" title="Draft lower-third preview"></iframe></div></div>
+      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261025-3" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261025-3" title="Draft lower-third preview"></iframe></div></div>
       <div class="on-air"><strong>ON AIR</strong><span id="on-air-headline">Connecting…</span><span class="on-air-detail" id="on-air-lines"></span></div>
       <div class="preview-foot"><span><strong>Preview your draft, then play it live.</strong><br>Keep the server window open during your broadcast.</span><span>Transparent in OBS<br>Dark backdrop here for preview</span></div>
       <div class="url"><div class="url-label">OBS Browser Source URL</div><code id="obs-url"></code><p class="note">Set the source width to 1920 and height to 1080. Use this updated URL in OBS to load the speaker motion graphic.</p></div>
@@ -195,18 +205,31 @@
           <div class="action-row"><button class="button" id="preview-speaker" type="button">Preview animation</button><button class="button primary" id="play-speaker" type="button">▶ Play live</button><button class="button" id="hide-speaker" type="button">Take off air</button></div>
           <p class="note">The chosen time starts after the entrance finishes. Press Play again to run the same speaker from the beginning.</p>
         </div>
+        <div class="card" id="verse-editor" hidden><h2>Bible verse · Church theme</h2>
+          <p class="note" style="margin:-7px 0 18px">Search all 66 books in the offline King James Version. Try <strong>jhn 3:16</strong>, <strong>tim 4:12</strong> or a misspelling; choose from the suggestions. You can show up to four consecutive verses.</p>
+          <div class="field verse-search-wrap"><label for="verse-search">Book, chapter and verse</label><input id="verse-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="verse-suggestions" autocomplete="off" placeholder="Search e.g. jhn 3:16 or psalm 23:1"><div id="verse-suggestions" class="verse-suggestions" role="listbox" aria-label="Bible verse suggestions"></div></div>
+          <div class="verse-selection" id="verse-selection" hidden><strong id="verse-selected-reference"></strong><p id="verse-selected-text"></p></div>
+          <label class="field" style="margin-top:18px"><span>Time on screen</span><select id="verse-stay"><option value="6">6 seconds</option><option value="8">8 seconds</option><option value="10" selected>10 seconds</option><option value="12">12 seconds</option><option value="15">15 seconds</option><option value="20">20 seconds</option></select></label>
+          <div class="action-row"><button class="button" id="previous-verse" type="button" disabled>← Previous verse</button><button class="button" id="next-verse" type="button" disabled>Next verse →</button><button class="button" id="preview-verse" type="button">Preview verse</button><button class="button primary" id="play-verse" type="button">▶ Play verse live</button><button class="button" id="hide-verse" type="button">Take off air</button></div>
+          <p class="note">The verse animates in, stays for the selected time, and animates out. Playing it does not change the headline or ticker.</p>
+        </div>
       </div>
       <div class="tab-panel" id="theme-panel" role="tabpanel" aria-labelledby="theme-tab" hidden>
-        <p class="section-intro">Choose a complete look for the live graphic. News keeps the current design; Church uses a warm serif layout; Podcast uses a dark studio layout. Your saved stories stay intact.</p>
+        <p class="section-intro">Choose a complete look for the live graphic. Church uses a royal blue and gold service layout with the logo at top right; News and Podcast retain their own layouts. Your saved stories stay intact.</p>
         <div class="card"><h2>Visual format</h2>
           <input id="theme-choice" type="hidden" data-core="theme" value="news">
           <div class="theme-grid" role="group" aria-label="Overlay themes">
             <button class="theme-card" type="button" data-theme-option="news" aria-pressed="true" style="--art-bg:#34373e;--art-line:#555b65;--art-panel:#f4f4f4;--art-accent:#c90013"><span class="theme-art" aria-hidden="true"></span><span><strong>News</strong><small>Sharp red headline, angled tag and breaking ticker.</small></span></button>
-            <button class="theme-card" type="button" data-theme-option="church" aria-pressed="false" style="--art-bg:#11252c;--art-line:#786746;--art-panel:#20383c;--art-accent:#d8b879"><span class="theme-art" aria-hidden="true"></span><span><strong>Church</strong><small>Warm gold, serif headline and a calm service banner.</small></span></button>
+            <button class="theme-card" type="button" data-theme-option="church" aria-pressed="false" style="--art-bg:#faf9ff;--art-line:#e1d9ee;--art-panel:#241074;--art-accent:#e9bf3e"><span class="theme-art" aria-hidden="true"></span><span><strong>Church</strong><small>Royal blue and gold service bar, top-right logo and scripture graphic.</small></span></button>
             <button class="theme-card" type="button" data-theme-option="podcast" aria-pressed="false" style="--art-bg:#101426;--art-line:#32635f;--art-panel:#1c2634;--art-accent:#47e1d1"><span class="theme-art" aria-hidden="true"></span><span><strong>Podcast</strong><small>Dark audio desk, neon accent and a mic style ticker.</small></span></button>
           </div>
           <div class="action-row"><button class="button primary" id="save-theme" type="button">Apply theme live</button></div>
           <p class="note">Selecting a theme previews it. Apply theme live to save the format and its colors for every story. You can fine tune colors in Broadcast settings.</p>
+        </div>
+        <div class="card" id="pastor-image-card" hidden><h2>Church pastor portrait</h2>
+          <input type="hidden" data-core="pastorImage">
+          <p class="note">Upload a PNG, JPEG or WebP portrait. It appears 300px high at the lower left, behind the Ministering label. A transparent PNG gives the cleanest result.</p>
+          <div class="upload-row" style="margin-top:14px"><input id="pastor-file" type="file" accept="image/png,image/jpeg,image/webp"><span class="note">Up to 6 MB · upload applies it live</span></div>
         </div>
       </div>
       <div class="tab-panel" id="core-panel" role="tabpanel" aria-labelledby="core-tab" hidden>
@@ -270,7 +293,7 @@
 
   <script>
     const serviceOrigin = location.protocol === "file:" ? "http://127.0.0.1:8080" : location.origin;
-    const obsUrl = new URL("/news-lower-third.html?v=20261025-2", serviceOrigin).href;
+    const obsUrl = new URL("/news-lower-third.html?v=20261025-3", serviceOrigin).href;
     document.getElementById("obs-url").textContent = obsUrl;
     document.getElementById("dock-url").textContent = new URL("/news-obs-dock.html", serviceOrigin).href;
     const status = document.getElementById("status");
@@ -288,6 +311,10 @@
     let coreDirty = false;
     let speakerDirty = false;
     let speakerTemplate = 1;
+    let bibleBooks = [];
+    let selectedVerse = null;
+    let verseDirty = false;
+    let verseSearchRevision = 0;
     let activeTab = "stories";
     function setStatus(message, kind = "") {
       status.className = `status ${kind}`;
@@ -420,10 +447,91 @@
         button.setAttribute("aria-pressed", String(Number(button.dataset.speakerTemplate) === speakerTemplate));
       }
     }
+    const bibleAliases = { John:["jhn","jn","joh"], Ps:["psalm","psalms","psa"], Prov:["proverb","proverbs"], Song:["songofsongs","songofsolomon"], "1Tim":["tim","timothy","1tim"], "2Tim":["tim","timothy","2tim"], "1Thess":["thess","thessalonians"], "2Thess":["thess","thessalonians"], Rev:["revelation","revelations"], Matt:["mat","mt"], Mark:["mrk","mk"], Luke:["luk","lk"] };
+    const normalizeBook = value => String(value).toLowerCase().replace(/[^a-z0-9]/g, "");
+    function editDistance(a, b) {
+      const row = Array.from({ length: b.length + 1 }, (_, index) => index);
+      for (let i = 1; i <= a.length; i++) { let previous = row[0]; row[0] = i;
+        for (let j = 1; j <= b.length; j++) { const old = row[j]; row[j] = Math.min(row[j] + 1, row[j - 1] + 1, previous + (a[i - 1] === b[j - 1] ? 0 : 1)); previous = old; }
+      } return row[b.length];
+    }
+    function bookScore(book, query) {
+      const q = normalizeBook(query); if (!q) return 100;
+      const keys = [book.name, book.code, ...(bibleAliases[book.code] || [])].map(normalizeBook);
+      return Math.min(...keys.map(key => key === q ? 0 : key.startsWith(q) ? 1 : key.includes(q) ? 3 : 5 + editDistance(key, q)));
+    }
+    function parseBibleSearch(value) {
+      const match = value.trim().match(/^(.+?)(?:\s+(\d{1,3})(?::(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?)?)?$/);
+      return match ? { bookQuery:match[1], chapter:match[2] ? Number(match[2]) : null, verse:match[3] ? Number(match[3]) : null, end:match[4] ? Number(match[4]) : null } : null;
+    }
+    function showSelectedVerse(verse) {
+      selectedVerse = verse; const box = document.getElementById("verse-selection"); box.hidden = !verse;
+      document.getElementById("verse-selected-reference").textContent = verse ? `${verse.reference} · KJV` : "";
+      document.getElementById("verse-selected-text").textContent = verse?.text || "";
+      document.getElementById("previous-verse").disabled = !verse;
+      document.getElementById("next-verse").disabled = !verse;
+    }
+    function fillVerse(state) {
+      document.getElementById("verse-stay").value = String(state.verseStay || 10);
+      document.getElementById("verse-search").value = state.verseReference || "";
+      showSelectedVerse(state.verseBook && state.verseText ? {book:state.verseBook, chapter:state.verseChapter, verse:state.verseNumber, end:state.verseEnd, reference:state.verseReference, text:state.verseText} : null);
+    }
+    function updateVerseVisibility() {
+      const church = document.getElementById("theme-choice").value === "church";
+      document.getElementById("verse-editor").hidden = !church;
+      document.getElementById("pastor-image-card").hidden = !church;
+    }
+    async function renderVerseSuggestions() {
+      const revision = ++verseSearchRevision, list = document.getElementById("verse-suggestions"), input = document.getElementById("verse-search");
+      list.replaceChildren(); input.setAttribute("aria-expanded", "false"); const parsed = parseBibleSearch(input.value); if (!parsed || !bibleBooks.length) return;
+      const ranked = bibleBooks.map(book => ({book, score:bookScore(book, parsed.bookQuery)})).filter(item => item.score < 11).sort((a,b) => a.score - b.score).slice(0, 6);
+      const suggestions = await Promise.all(ranked.map(async ({book,score}) => {
+        if (!parsed.chapter || !parsed.verse) return {book,score};
+        if (parsed.chapter > book.chapters.length || parsed.verse > book.chapters[parsed.chapter - 1] || (parsed.end && parsed.end > book.chapters[parsed.chapter - 1])) return null;
+        try { const query = new URLSearchParams({book:book.code,chapter:parsed.chapter,verse:parsed.verse,end:parsed.end || parsed.verse}); return {book,score,verse:await api(`/api/bible/lookup?${query}`)}; } catch (_) { return null; }
+      }));
+      if (revision !== verseSearchRevision) return;
+      const valid = suggestions.filter(Boolean);
+      for (const item of valid) { const button = document.createElement("button"); button.type="button"; button.className="verse-suggestion"; button.setAttribute("role","option");
+        const title=document.createElement("strong"), detail=document.createElement("small"); title.textContent=item.verse?.reference || (parsed.chapter ? `${item.book.name} ${parsed.chapter}` : item.book.name); detail.textContent=item.verse?.text || (parsed.chapter ? `Chapter ${parsed.chapter} · type a verse after the colon` : `${item.book.chapters.length} chapters`); button.append(title,detail);
+        button.addEventListener("click",()=>{ if(item.verse){ input.value=item.verse.reference; showSelectedVerse(item.verse); } else { input.value=parsed.chapter ? `${item.book.name} ${parsed.chapter}:` : `${item.book.name} `; input.focus(); } verseDirty=true; list.replaceChildren(); input.setAttribute("aria-expanded","false"); }); list.appendChild(button); }
+      input.setAttribute("aria-expanded", String(valid.length > 0)); if (valid.length === 1 && valid[0].verse) showSelectedVerse(valid[0].verse);
+    }
+    async function moveVerse(direction) {
+      if (!selectedVerse) return;
+      const index = bibleBooks.findIndex(book => book.code === selectedVerse.book);
+      if (index < 0) return;
+      let book = bibleBooks[index], chapter = selectedVerse.chapter, verse = direction > 0 ? selectedVerse.end + 1 : selectedVerse.verse - 1;
+      if (verse < 1) {
+        if (chapter > 1) { chapter--; verse = book.chapters[chapter - 1]; }
+        else if (index > 0) { book = bibleBooks[index - 1]; chapter = book.chapters.length; verse = book.chapters[chapter - 1]; }
+        else { setStatus("This is the first verse in the Bible", "error"); return; }
+      }
+      if (verse > book.chapters[chapter - 1]) {
+        if (chapter < book.chapters.length) { chapter++; verse = 1; }
+        else if (index < bibleBooks.length - 1) { book = bibleBooks[index + 1]; chapter = 1; verse = 1; }
+        else { setStatus("This is the last verse in the Bible", "error"); return; }
+      }
+      try {
+        const query = new URLSearchParams({book:book.code,chapter,verse,end:verse});
+        const next = await api(`/api/bible/lookup?${query}`);
+        document.getElementById("verse-search").value = next.reference;
+        showSelectedVerse(next);
+        verseDirty = true;
+        if (liveState.verseEventId) {
+          setStatus(`Sending ${next.reference} live…`);
+          const state = await api("/api/verse/play", {book:next.book,chapter:next.chapter,verse:next.verse,end:next.end,stay:Number(document.getElementById("verse-stay").value)});
+          verseDirty = false;
+          showLiveState(state);
+          pushLivePreview(state);
+          setStatus(`${state.verseReference} is live · text transition`, "ok");
+        } else setStatus(`${next.reference} selected · KJV`, "ok");
+      } catch (error) { setStatus(error.message, "error"); }
+    }
     function updateDraftPreview() {
       if (draftFrame.contentWindow) {
         const draft = activeTab === "stories" ? { ...liveState, ...collectStory() }
-          : activeTab === "speaker" ? { ...liveState, speakerEventId: "" }
+          : activeTab === "speaker" ? { ...liveState, ...collectCore(), speakerEventId: "", verseEventId: "" }
           : { ...liveState, ...collectCore() };
         draftFrame.contentWindow.postMessage({ type: "draft-state", state: draft }, serviceOrigin);
       }
@@ -472,6 +580,11 @@
         if (ready) setStatus("Speaker template selected · preview or play live", "ok");
       });
     }
+    document.getElementById("verse-search").addEventListener("input", () => { verseDirty = true; showSelectedVerse(null); renderVerseSuggestions(); });
+    document.getElementById("verse-search").addEventListener("keydown", event => { if (event.key === "Enter") { const first = document.querySelector("#verse-suggestions button"); if (first) { event.preventDefault(); first.click(); } } });
+    document.getElementById("verse-stay").addEventListener("change", () => { verseDirty = true; });
+    document.getElementById("previous-verse").addEventListener("click", () => moveVerse(-1));
+    document.getElementById("next-verse").addEventListener("click", () => moveVerse(1));
     function showTab(name) {
       activeTab = name;
       document.getElementById("stories-panel").hidden = name !== "stories";
@@ -482,6 +595,7 @@
       document.getElementById("speaker-tab").setAttribute("aria-selected", String(name === "speaker"));
       document.getElementById("theme-tab").setAttribute("aria-selected", String(name === "theme"));
       document.getElementById("core-tab").setAttribute("aria-selected", String(name === "core"));
+      updateVerseVisibility();
       updateDraftPreview();
       showPreview("draft");
     }
@@ -491,7 +605,7 @@
     document.getElementById("core-tab").addEventListener("click", () => showTab("core"));
     const themePalettes = {
       news: {accent:"#c90013",accentDark:"#87000c",panelLight:"#ffffff",panelDark:"#b6b9bc",headlineColor:"#292a2d",subtitleColor:"#616367",tickerColor:"#ffffff",logoBg:"#38393d"},
-      church: {accent:"#d8b879",accentDark:"#5d4930",panelLight:"#193137",panelDark:"#0d2027",headlineColor:"#fff7e5",subtitleColor:"#e6cfa7",tickerColor:"#fff5dc",logoBg:"#273b3d"},
+      church: {accent:"#e9bf3e",accentDark:"#ac7a13",panelLight:"#32148e",panelDark:"#14034e",headlineColor:"#ffffff",subtitleColor:"#ffffff",tickerColor:"#ffffff",logoBg:"#240d78"},
       podcast: {accent:"#47e1d1",accentDark:"#3b4b9b",panelLight:"#17212f",panelDark:"#101526",headlineColor:"#f8f9ff",subtitleColor:"#a9f4e9",tickerColor:"#f8f9ff",logoBg:"#1c2347"}
     };
     function updateThemeCards() {
@@ -499,6 +613,7 @@
       for (const button of document.querySelectorAll("[data-theme-option]")) {
         button.setAttribute("aria-pressed", String(button.dataset.themeOption === selected));
       }
+      updateVerseVisibility();
     }
     for (const button of document.querySelectorAll("[data-theme-option]")) {
       button.addEventListener("click", () => {
@@ -539,6 +654,7 @@
         : `${lineCount} supporting line${lineCount === 1 ? "" : "s"} · add at least 2 to rotate`;
       if (!coreDirty) fillCore(state);
       if (!speakerDirty) fillSpeaker(state);
+      if (!verseDirty) fillVerse(state);
       renderCues();
     }
     function pushLivePreview(state) {
@@ -681,6 +797,21 @@
         setStatus("Speaker graphic leaving the screen", "ok");
       });
     });
+    document.getElementById("preview-verse").addEventListener("click", () => {
+      if (!selectedVerse) { setStatus("Choose a verse from the suggestions", "error"); return; }
+      updateDraftPreview(); showPreview("draft");
+      draftFrame.contentWindow?.postMessage({ type:"verse-preview", verse:{verseReference:selectedVerse.reference, verseText:selectedVerse.text, verseStay:Number(document.getElementById("verse-stay").value)} }, serviceOrigin);
+      setStatus("Previewing Bible verse · not live", "ok");
+    });
+    document.getElementById("play-verse").addEventListener("click", () => {
+      if (!ready || !selectedVerse) { setStatus("Choose a verse from the suggestions", "error"); return; }
+      const verse=selectedVerse; showPreview("live"); setStatus("Sending Bible verse live…");
+      runAction(async () => { const state=await api("/api/verse/play", {book:verse.book,chapter:verse.chapter,verse:verse.verse,end:verse.end,stay:Number(document.getElementById("verse-stay").value)}); verseDirty=false; showLiveState(state); pushLivePreview(state); setStatus(`${state.verseReference} is live · KJV`, "ok"); });
+    });
+    document.getElementById("hide-verse").addEventListener("click", () => {
+      if (!ready) return;
+      runAction(async () => { const state=await api("/api/verse/hide", {}); showLiveState(state); pushLivePreview(state); showPreview("live"); setStatus("Bible verse leaving the screen", "ok"); });
+    });
     document.getElementById("take-draft-live").addEventListener("click", () => {
       if (!ready) return;
       const settings = collectStory();
@@ -710,18 +841,38 @@
       });
       event.target.value = "";
     });
+    document.getElementById("pastor-file").addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      setStatus("Uploading pastor portrait…");
+      runAction(async () => {
+        const response = await fetch("/api/pastor", { method:"POST", headers:{"Content-Type":file.type}, body:file });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Pastor portrait upload failed");
+        document.querySelector('[data-core="pastorImage"]').value = result.pastorImage;
+        const state = await api("/api/core", {pastorImage:result.pastorImage});
+        coreDirty = false;
+        showLiveState(state);
+        pushLivePreview(state);
+        showPreview("live");
+        setStatus("Pastor portrait is live in the Church layer", "ok");
+      });
+      event.target.value = "";
+    });
     async function initialize() {
       if (location.protocol === "file:") {
         setStatus("Start start-news-overlay.bat, then open the control URL", "error");
         return;
       }
       try {
-        const [state, library] = await Promise.all([api("/api/state"), api("/api/cues")]);
+        const [state, library, bible] = await Promise.all([api("/api/state"), api("/api/cues"), api("/api/bible/books")]);
         cues = library.cues;
+        bibleBooks = bible.books;
         liveState = state;
         fillCore(state);
         fillStory(state);
         fillSpeaker(state);
+        fillVerse(state);
         showLiveState(state);
         ready = true;
         setStatus("Connected · ready", "ok");

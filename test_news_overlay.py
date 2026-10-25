@@ -125,6 +125,41 @@ class OverlaySeparationTest(unittest.TestCase):
             server.shutdown()
             server.server_close()
 
+    def test_offline_bible_lookup_and_verse_playback(self):
+        spec = importlib.util.spec_from_file_location("overlay_server", Path(__file__).with_name("news-overlay-server.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as directory:
+            module.STATE_FILE = Path(directory) / "state.json"
+            module.CUES_FILE = Path(directory) / "cues.json"
+            module.STATE = module.DEFAULTS.copy()
+            module.CUES = []
+            server = ThreadingHTTPServer(("127.0.0.1", 0), module.Handler)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            base = f"http://127.0.0.1:{server.server_port}"
+
+            def post(path, payload):
+                request = Request(base + path, json.dumps(payload).encode("utf-8"), {"Content-Type": "application/json"})
+                with urlopen(request) as response:
+                    return json.load(response)
+
+            try:
+                with urlopen(base + "/api/bible/lookup?book=John&chapter=3&verse=16") as response:
+                    verse = json.load(response)
+                self.assertEqual(verse["reference"], "John 3:16")
+                self.assertIn("God so loved", verse["text"])
+                state = post("/api/verse/play", {"book": "John", "chapter": 3, "verse": 16, "end": 16, "stay": 10})
+                self.assertEqual(state["verseReference"], "John 3:16")
+                self.assertEqual(state["storyRevision"], 1)
+                self.assertTrue(state["verseEventId"])
+                with self.assertRaises(HTTPError) as invalid:
+                    post("/api/verse/play", {"book": "John", "chapter": 3, "verse": 99, "stay": 10})
+                self.assertEqual(invalid.exception.code, 400)
+            finally:
+                server.shutdown()
+                server.server_close()
+
 
 if __name__ == "__main__":
     unittest.main()

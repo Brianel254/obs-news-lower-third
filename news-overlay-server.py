@@ -13,7 +13,7 @@ import time
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 from uuid import uuid4
 
 
@@ -22,6 +22,7 @@ STATE_FILE = ROOT / "news-overlay-state.json"
 LOGO_FILE = ROOT / "news-logo-upload.bin"
 LOGO_DIR = ROOT / "news-logos"
 CUES_FILE = ROOT / "news-overlay-cues.json"
+BIBLE_FILE = ROOT / "bible-kjv.json"
 DEFAULT_HOST = os.environ.get("NEWS_OVERLAY_HOST", "0.0.0.0")
 DEFAULT_PORT = int(os.environ.get("NEWS_OVERLAY_PORT", "8080"))
 LOCK = threading.Lock()
@@ -39,6 +40,7 @@ DEFAULTS = {
     "zoneLabel": "EAT",
     "logo": "logo.png",
     "logoMime": "image/png",
+    "pastorImage": "",
     "tickerSeconds": 34,
     "accent": "#c90013",
     "accentDark": "#87000c",
@@ -69,11 +71,44 @@ DEFAULTS = {
     "speakerStay": 4,
     "speakerEventId": "",
     "speakerStartedAt": 0,
+    "verseBook": "",
+    "verseChapter": 0,
+    "verseNumber": 0,
+    "verseEnd": 0,
+    "verseReference": "",
+    "verseText": "",
+    "verseStay": 10,
+    "verseEventId": "",
+    "verseStartedAt": 0,
 }
 
 STORY_KEYS = {"label", "headline", "supportingLines", "supportingInterval"}
 SPEAKER_KEYS = {"speakerName", "speakerTitle", "speakerTemplate", "speakerSide", "speakerStay"}
-CORE_KEYS = set(DEFAULTS) - STORY_KEYS - SPEAKER_KEYS - {"subtitle", "ticker", "revision", "storyRevision", "activeCueId", "logoMime", "speakerEventId", "speakerStartedAt"}
+VERSE_KEYS = {"verseBook", "verseChapter", "verseNumber", "verseEnd", "verseReference", "verseText", "verseStay", "verseEventId", "verseStartedAt"}
+CORE_KEYS = set(DEFAULTS) - STORY_KEYS - SPEAKER_KEYS - VERSE_KEYS - {"subtitle", "ticker", "revision", "storyRevision", "activeCueId", "logoMime", "speakerEventId", "speakerStartedAt"}
+
+try:
+    BIBLE = json.loads(BIBLE_FILE.read_text(encoding="utf-8"))
+    BIBLE_BOOKS = {book["book"]: book for book in BIBLE["books"]}
+except (OSError, ValueError, KeyError) as exc:
+    print(f"Bible file could not be loaded: {exc}")
+    BIBLE_BOOKS = {}
+
+
+def verse_lookup(book_code: str, chapter: int, verse: int, end: int) -> dict:
+    if book_code not in BIBLE_BOOKS:
+        raise ValueError("Choose a Bible book from the suggestions")
+    book = BIBLE_BOOKS[book_code]
+    if not all(type(number) is int for number in (chapter, verse, end)) or not 1 <= chapter <= len(book["chapters"]):
+        raise ValueError("Choose a valid chapter and verse")
+    verses = book["chapters"][chapter - 1]["verses"]
+    if not 1 <= verse <= end <= len(verses) or end - verse > 3:
+        raise ValueError("Choose one to four verses from the same chapter")
+    selected = verses[verse - 1:end]
+    reference = f'{book["englishName"]} {chapter}:{verse}' + (f"-{end}" if end != verse else "")
+    text = " ".join(item["text"].strip() for item in selected)
+    return {"book": book_code, "chapter": chapter, "verse": verse, "end": end,
+            "reference": reference, "text": text, "translation": "KJV"}
 
 TEXT_LIMITS = {
     "label": 48,
@@ -83,6 +118,7 @@ TEXT_LIMITS = {
     "timeZone": 80,
     "zoneLabel": 12,
     "logo": 2048,
+    "pastorImage": 2048,
 }
 COLORS = {
     "accent", "accentDark", "panelLight", "panelDark", "headlineColor",
@@ -116,6 +152,18 @@ def checked_value(key: str, value: object) -> object:
     if key == "speakerStay":
         if type(value) is not int or not 4 <= value <= 10:
             raise ValueError("Speaker stay time must be 4 to 10 seconds")
+        return value
+    if key == "verseStay":
+        if type(value) is not int or not 6 <= value <= 20:
+            raise ValueError("Verse stay time must be 6 to 20 seconds")
+        return value
+    if key in {"verseBook", "verseReference", "verseText"}:
+        if not isinstance(value, str) or len(value) > (1600 if key == "verseText" else 100):
+            raise ValueError(f"Invalid {key}")
+        return value
+    if key in {"verseChapter", "verseNumber", "verseEnd"}:
+        if type(value) is not int or not 0 <= value <= 200:
+            raise ValueError(f"Invalid {key}")
         return value
     if key == "theme":
         if value not in {"news", "church", "podcast"}:
@@ -163,12 +211,16 @@ def load_state() -> dict:
         try:
             saved = json.loads(STATE_FILE.read_text(encoding="utf-8"))
             for key, value in saved.items():
-                if key in DEFAULTS and key not in {"revision", "storyRevision", "logoMime", "activeCueId", "speakerEventId", "speakerStartedAt"}:
+                if key in DEFAULTS and key not in {"revision", "storyRevision", "logoMime", "activeCueId", "speakerEventId", "speakerStartedAt", "verseEventId", "verseStartedAt"}:
                     state[key] = checked_value(key, value)
             if isinstance(saved.get("speakerEventId"), str) and re.fullmatch(r"[0-9a-f]{32}|", saved["speakerEventId"]):
                 state["speakerEventId"] = saved["speakerEventId"]
             if type(saved.get("speakerStartedAt")) is int and saved["speakerStartedAt"] >= 0:
                 state["speakerStartedAt"] = saved["speakerStartedAt"]
+            if isinstance(saved.get("verseEventId"), str) and re.fullmatch(r"[0-9a-f]{32}|", saved["verseEventId"]):
+                state["verseEventId"] = saved["verseEventId"]
+            if type(saved.get("verseStartedAt")) is int and saved["verseStartedAt"] >= 0:
+                state["verseStartedAt"] = saved["verseStartedAt"]
             if saved.get("logoMime") in {"image/png", "image/jpeg", "image/webp"}:
                 state["logoMime"] = saved["logoMime"]
             if isinstance(saved.get("revision"), int):
@@ -295,7 +347,8 @@ class Handler(BaseHTTPRequestHandler):
         if not self.allowed_request():
             self.send_json({"error": "Local requests only"}, 403)
             return
-        path = urlsplit(self.path).path
+        parsed = urlsplit(self.path)
+        path = parsed.path
         if path == "/":
             self.send_response(302)
             self.send_header("Location", "/news-controls.html")
@@ -312,6 +365,22 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/network":
             addresses = network_ipv4_addresses() if self.server.server_address[0] != "127.0.0.1" else []
             self.send_json({"port": self.server.server_port, "addresses": addresses})
+            return
+        if path == "/api/bible/books":
+            self.send_json({"translation": "KJV", "books": [
+                {"code": code, "name": book["englishName"], "chapters":
+                 [len(chapter["verses"]) for chapter in book["chapters"]]}
+                for code, book in BIBLE_BOOKS.items()
+            ]})
+            return
+        if path == "/api/bible/lookup":
+            try:
+                query = parse_qs(parsed.query)
+                answer = verse_lookup(query.get("book", [""])[0], int(query.get("chapter", ["0"])[0]),
+                                      int(query.get("verse", ["0"])[0]), int(query.get("end", query.get("verse", ["0"]))[0]))
+                self.send_json(answer)
+            except (ValueError, TypeError) as exc:
+                self.send_json({"error": str(exc)}, 400)
             return
         if path.startswith("/media/logo/"):
             name = path.removeprefix("/media/logo/")
@@ -347,12 +416,12 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"error": "Local requests only"}, 403)
             return
         path = urlsplit(self.path).path
-        if path not in {"/api/state", "/api/core", "/api/logo", "/api/cues/save", "/api/cues/delete", "/api/activate", "/api/speaker/play", "/api/speaker/hide"}:
+        if path not in {"/api/state", "/api/core", "/api/logo", "/api/pastor", "/api/cues/save", "/api/cues/delete", "/api/activate", "/api/speaker/play", "/api/speaker/hide", "/api/verse/play", "/api/verse/hide"}:
             self.send_json({"error": "Not found"}, 404)
             return
         try:
             size = int(self.headers.get("Content-Length", "0"))
-            limit = 6_000_000 if path == "/api/logo" else 65_536
+            limit = 6_000_000 if path in {"/api/logo", "/api/pastor"} else 65_536
             if not 0 < size <= limit:
                 raise ValueError("Request size is invalid")
             body = self.rfile.read(size)
@@ -390,6 +459,28 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/speaker/hide":
                 with LOCK:
                     next_state = {**STATE, "speakerEventId": "", "revision": STATE["revision"] + 1}
+                    save_state(next_state)
+                    STATE = next_state
+                    answer = STATE.copy()
+            elif path == "/api/verse/play":
+                incoming = json.loads(body)
+                if not isinstance(incoming, dict):
+                    raise ValueError("Verse settings must be an object")
+                result = verse_lookup(incoming.get("book", ""), incoming.get("chapter"),
+                                      incoming.get("verse"), incoming.get("end", incoming.get("verse")))
+                stay = checked_value("verseStay", incoming.get("stay", 10))
+                with LOCK:
+                    next_state = {**STATE, "verseBook": result["book"], "verseChapter": result["chapter"],
+                                  "verseNumber": result["verse"], "verseEnd": result["end"],
+                                  "verseReference": result["reference"], "verseText": result["text"],
+                                  "verseStay": stay, "verseEventId": uuid4().hex,
+                                  "verseStartedAt": int(time.time() * 1000), "revision": STATE["revision"] + 1}
+                    save_state(next_state)
+                    STATE = next_state
+                    answer = STATE.copy()
+            elif path == "/api/verse/hide":
+                with LOCK:
+                    next_state = {**STATE, "verseEventId": "", "revision": STATE["revision"] + 1}
                     save_state(next_state)
                     STATE = next_state
                     answer = STATE.copy()
@@ -454,7 +545,7 @@ class Handler(BaseHTTPRequestHandler):
                         save_state(next_state)
                         STATE = next_state
                     answer = {"cues": CUES.copy()}
-            else:  # /api/logo uploads an asset for a future cue; it does not change the live output.
+            else:  # Image uploads do not change the live output until their returned URL is saved.
                 if body.startswith(b"\x89PNG\r\n\x1a\n"):
                     extension = "png"
                 elif body.startswith(b"\xff\xd8\xff"):
@@ -466,7 +557,7 @@ class Handler(BaseHTTPRequestHandler):
                 LOGO_DIR.mkdir(exist_ok=True)
                 filename = f"{uuid4().hex}.{extension}"
                 (LOGO_DIR / filename).write_bytes(body)
-                answer = {"logo": f"/media/logo/{filename}"}
+                answer = {"logo" if path == "/api/logo" else "pastorImage": f"/media/logo/{filename}"}
             self.send_json(answer)
         except (ValueError, TypeError, json.JSONDecodeError, OSError) as exc:
             self.send_json({"error": str(exc)}, 400)

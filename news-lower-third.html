@@ -305,35 +305,59 @@
     .is-hidden { display: none !important; }
     .lower-third.no-ticker .main-panel { bottom: 0; }
 
-    /* Each format has its own silhouette, typography, clock, logo treatment and ticker. */
-    #stage[data-theme="church"] .lower-third { height: 218px; filter: drop-shadow(0 9px 24px rgba(2,14,20,.55)); }
-    #stage[data-theme="church"] .top-rule { top: 17px; height: 2px; background: var(--accent); }
-    #stage[data-theme="church"] .main-panel {
-      inset: 24px 0 42px; border: 1px solid color-mix(in srgb, var(--accent) 70%, white);
-      border-top: 4px solid var(--accent); border-radius: 18px 18px 4px 4px;
-      background: linear-gradient(110deg, var(--panel-light), var(--panel-dark));
-      box-shadow: inset 0 1px rgba(255,255,255,.12), 0 10px 30px rgba(0,0,0,.28);
-    }
-    #stage[data-theme="church"] .lower-third.no-ticker .main-panel { bottom: 0; }
-    #stage[data-theme="church"] .copy { padding: 34px 36px 11px 39px; }
-    #stage[data-theme="church"] .headline { font-family: Georgia, "Times New Roman", serif; font-size: 55px; font-weight: 700; letter-spacing: -.035em; }
-    #stage[data-theme="church"] .subtitle { font-family: Georgia, "Times New Roman", serif; font-size: 24px; font-style: italic; }
-    #stage[data-theme="church"] .breaking-label {
-      top: -5px; left: 25px; min-width: 215px; height: 37px; padding: 0 21px;
-      clip-path: none; border-radius: 4px 4px 0 0; background: var(--accent);
-      color: #18292b; font-family: Georgia, "Times New Roman", serif; font-size: 19px;
-      font-weight: 700; letter-spacing: .09em; text-shadow: none;
-    }
-    #stage[data-theme="church"] .logo-box { flex-basis: 214px; border-left: 1px solid var(--accent); background: radial-gradient(circle at 50% 40%, var(--logo-bg), #101f24 75%); box-shadow: none; }
-    #stage[data-theme="church"] .logo-box::before { width: 150px; height: 150px; border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
-    #stage[data-theme="church"] .ticker { height: 42px; border-radius: 0 0 8px 8px; background: linear-gradient(90deg, var(--accent-dark), var(--logo-bg)); box-shadow: inset 0 1px var(--accent); }
-    #stage[data-theme="church"] .ticker-lead { background: var(--accent); color: #18292b; border-right: 0; font-family: Georgia, "Times New Roman", serif; letter-spacing: .04em; }
-    #stage[data-theme="church"] .ticker-separator { color: var(--accent); }
-    #stage[data-theme="church"] .live-label { border-radius: 4px 4px 0 0; background: var(--accent); color: #18292b; box-shadow: none; }
-    #stage[data-theme="church"] .live-dot { background: #18292b; box-shadow: 0 0 0 4px rgba(24,41,43,.16); }
-    #stage[data-theme="church"] .clock { background: #fff6e4; color: #18292b; }
-    #stage[data-theme="church"] .clock-zone { background: var(--logo-bg); border-bottom: 2px solid var(--accent); }
-    #stage[data-theme="church"] .copy::after { background: linear-gradient(90deg, transparent, var(--accent) 45%, #fff6e4 65%, transparent); opacity: .55; }
+    /* Church: a full-width royal blue service bar, gold details and a top-right brand. */
+    .church-brand { display:none; position:absolute; top:45px; right:57px; width:340px; height:104px; align-items:center; justify-content:flex-end; color:#201066; }
+    .church-brand-placeholder { display:flex; align-items:center; gap:12px; font-size:21px; font-weight:900; line-height:.98; letter-spacing:.05em; }
+    .church-brand-placeholder svg { width:80px; height:80px; fill:#281178; flex:none; }
+    .church-brand img { display:none; max-width:100%; max-height:100%; object-fit:contain; object-position:right center; }
+    .church-brand.has-logo img { display:block; }
+    .church-brand.has-logo .church-brand-placeholder { display:none; }
+    #stage[data-theme="church"] .church-brand { display:flex; }
+    #stage[data-theme="church"] .lower-third { left:0; right:0; bottom:var(--bottom-offset); height:126px; filter:drop-shadow(0 -3px 13px rgba(18,4,70,.2)); }
+    #stage[data-theme="church"] .top-rule { display:none; }
+    #stage[data-theme="church"] .main-panel { inset:0; border:0; background:linear-gradient(112deg,var(--panel-light),var(--panel-dark) 80%); box-shadow:none; overflow:visible; }
+    #stage[data-theme="church"] .copy { display:grid; grid-template-columns:39% 61%; flex:1; padding:0; overflow:visible; }
+    #stage[data-theme="church"] .headline-frame { height:126px; padding:0 26px 17px 64px; border-right:5px solid var(--accent); background:linear-gradient(115deg,var(--panel-light),var(--panel-dark)); overflow:hidden; }
+    #stage[data-theme="church"] .headline { inset:auto 22px 17px 64px; color:#fff; font-size:60px; font-weight:900; letter-spacing:-.035em; line-height:1; }
+    #stage[data-theme="church"] .subtitle-frame { height:84px; margin:0; padding:17px 24px; background:linear-gradient(100deg,var(--panel-dark),var(--logo-bg)); }
+    #stage[data-theme="church"] .subtitle { inset:18px 25px auto; color:#fff; font-size:27px; font-weight:750; letter-spacing:.03em; line-height:1.18; }
+    #stage[data-theme="church"] .copy::after { top:0; bottom:0; left:0; right:0; background:linear-gradient(90deg,transparent,var(--accent),#fff,transparent); opacity:.65; }
+    #stage[data-theme="church"] .breaking-label { top:-29px; left:136px; min-width:226px; height:30px; padding:0 14px; clip-path:none; background:#fff; color:#1f0e6b; font-size:18px; letter-spacing:.055em; text-shadow:none; border-bottom:3px solid var(--accent); }
+    #stage[data-theme="church"] .logo-box { display:none; }
+    #stage[data-theme="church"] .ticker { left:39%; height:42px; border-top:1px solid color-mix(in srgb,var(--accent) 55%,transparent); background:linear-gradient(90deg,var(--logo-bg),var(--panel-dark)); box-shadow:none; }
+    #stage[data-theme="church"] .ticker-lead { background:linear-gradient(120deg,var(--accent),var(--accent-dark)); color:#1a0b59; border:0; font-size:14px; letter-spacing:.12em; }
+    #stage[data-theme="church"] .ticker-item { font-size:17px; font-weight:600; }
+    #stage[data-theme="church"] .ticker-separator { color:var(--accent); }
+    #stage[data-theme="church"] .live-corner { min-width:150px; filter:none; }
+    #stage[data-theme="church"] .live-label { height:31px; padding:0 12px; border-radius:18px; background:#111; color:#fff; font-size:19px; letter-spacing:.12em; box-shadow:none; }
+    #stage[data-theme="church"] .live-dot { width:11px; height:11px; background:#ec193a; box-shadow:0 0 0 3px #ec193a33; }
+    #stage[data-theme="church"] .clock-row { height:28px; margin:3px 0 0 5px; }
+    #stage[data-theme="church"] .clock { min-width:0; padding:0 7px; background:rgba(255,255,255,.9); color:#201066; font-size:18px; }
+    #stage[data-theme="church"] .clock-zone { padding:0 7px; background:#201066; color:#fff; font-size:13px; }
+    #stage[data-theme="church"] .speaker-id { bottom:calc(var(--bottom-offset) + 130px); min-width:0; max-width:760px; filter:drop-shadow(0 4px 6px rgba(23,8,78,.25)); }
+    #stage[data-theme="church"] .speaker-id[data-side="left"] { left:365px; }
+    #stage[data-theme="church"] .speaker-id[data-side="right"] { right:125px; }
+    #stage[data-theme="church"] .speaker-name { min-width:0; background:linear-gradient(120deg,var(--accent),#fff2a6 45%,var(--accent-dark)) !important; color:#21105f !important; padding:9px 22px 8px !important; font-size:30px; letter-spacing:.02em; text-shadow:none !important; border:0 !important; }
+    #stage[data-theme="church"] .speaker-title { background:#fff !important; color:#241069 !important; padding:5px 13px 4px !important; font-size:16px; border:0 !important; font-style:normal; }
+
+    .verse-card { position:absolute; left:50%; bottom:calc(var(--bottom-offset) + 180px); width:1380px; max-width:calc(100% - 130px); min-height:176px; padding:21px 34px 22px 43px; transform:translateX(-50%); visibility:hidden; opacity:0; color:#fff; background:linear-gradient(112deg,#32158e,#190657 55%,#34158f); border-left:9px solid var(--accent); box-shadow:0 18px 38px rgba(12,5,51,.35); }
+    .verse-card::before { content:""; position:absolute; top:0; right:0; width:40%; height:5px; background:linear-gradient(90deg,transparent,#fff2a6,var(--accent)); }
+    .verse-kicker { color:var(--accent); font-size:17px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+    .verse-reference { margin:5px 0 10px; font-size:31px; font-weight:900; letter-spacing:.01em; text-transform:uppercase; }
+    .verse-text { margin:0; font-size:33px; font-weight:600; line-height:1.18; max-height:118px; overflow:hidden; }
+    .verse-card.is-entering,.verse-card.is-holding,.verse-card.is-exiting { visibility:visible; }
+    .verse-card.is-entering { animation:verse-in .85s cubic-bezier(.16,.8,.2,1) both; }
+    .verse-card.is-holding { opacity:1; }
+    .verse-card.is-exiting { animation:verse-out .7s cubic-bezier(.55,.05,.68,.19) both; }
+    .verse-card.is-entering .verse-kicker,.verse-card.is-entering .verse-reference,.verse-card.is-entering .verse-text { animation:verse-copy-in .58s .25s ease-out both; }
+    .verse-card.is-text-changing .verse-reference,.verse-card.is-text-changing .verse-text { animation:verse-text-change .42s ease-out both; }
+    @keyframes verse-in { from { opacity:0; transform:translate(-50%,90px) scale(.97); clip-path:inset(0 100% 0 0); } to { opacity:1; transform:translate(-50%,0) scale(1); clip-path:inset(0); } }
+    @keyframes verse-out { from { opacity:1; transform:translate(-50%,0); clip-path:inset(0); } to { opacity:0; transform:translate(-50%,-40px); clip-path:inset(0 0 100% 0); } }
+    @keyframes verse-copy-in { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes verse-text-change { 0% { opacity:0; transform:translateY(16px); filter:blur(4px); } 100% { opacity:1; transform:translateY(0); filter:blur(0); } }
+    #stage:not([data-theme="church"]) .verse-card { display:none; }
+    .pastor-portrait { display:none; position:absolute; z-index:5; left:44px; bottom:calc(var(--bottom-offset) + 125px); height:300px; max-width:300px; object-fit:contain; object-position:left bottom; filter:drop-shadow(0 10px 9px rgba(14,4,61,.34)); pointer-events:none; }
+    #stage[data-theme="church"] .pastor-portrait.has-image { display:block; }
 
     #stage[data-theme="podcast"] .lower-third { height: 205px; filter: drop-shadow(0 12px 26px rgba(0,0,0,.6)); }
     #stage[data-theme="podcast"] .top-rule { top: 10px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-dark), var(--accent)); }
@@ -407,10 +431,20 @@
       <div class="live-label"><span class="live-dot"></span>LIVE</div>
       <div class="clock-row"><div class="clock" id="clock">00:00:00</div><div class="clock-zone" id="clock-zone">EAT</div></div>
     </div>
+    <div class="church-brand" id="church-brand" aria-label="Church logo">
+      <div class="church-brand-placeholder"><svg viewBox="0 0 80 80" aria-hidden="true"><path d="M37 4h6v15h-6zM30 10h20v5H30zM40 20 8 47v7l8-5v23h18V55h12v17h18V49l8 5v-7L40 20Zm-13 32h8v10h-8V52Zm25 0h8v10h-8V52Z"/></svg><span>YOUR CHURCH<br>NAME HERE</span></div>
+      <img id="church-logo-image" alt="Church logo">
+    </div>
+    <img class="pastor-portrait" id="pastor-portrait" alt="Pastor portrait">
 
     <div class="speaker-id" id="speaker-id" data-template="1" data-side="left" aria-label="Speaker identification">
       <div class="speaker-title" id="speaker-title"></div>
       <div class="speaker-name" id="speaker-name"></div>
+    </div>
+    <div class="verse-card" id="verse-card" aria-label="Bible verse">
+      <div class="verse-kicker">SCRIPTURE READING · KJV</div>
+      <div class="verse-reference" id="verse-reference"></div>
+      <p class="verse-text" id="verse-text"></p>
     </div>
 
     <div class="lower-third">
@@ -447,7 +481,7 @@
       tickerItems: ["Replace this message with your scrolling update"],
       timeZone: "Africa/Nairobi",
       zoneLabel: "EAT",
-      logo: "logo.png",
+      logo: "logo.png", pastorImage: "",
       tickerSeconds: 34,
       accent: "#c90013",
       accentDark: "#87000c",
@@ -469,7 +503,9 @@
       cornerTop: 42,
       cornerLeft: 48,
       speakerName: "", speakerTitle: "", speakerTemplate: 1, speakerSide: "left",
-      speakerStay: 4, speakerEventId: "", speakerStartedAt: 0
+      speakerStay: 4, speakerEventId: "", speakerStartedAt: 0,
+      verseBook: "", verseChapter: 0, verseNumber: 0, verseEnd: 0,
+      verseReference: "", verseText: "", verseStay: 10, verseEventId: "", verseStartedAt: 0
     };
     let config = { ...defaults };
     const params = new URLSearchParams(location.search);
@@ -489,6 +525,9 @@
     const track = byId("ticker-track");
     const logo = document.getElementById("logo-image");
     const logoBox = byId("logo-box");
+    const churchLogo = byId("church-logo-image");
+    const churchBrand = byId("church-brand");
+    const pastorPortrait = byId("pastor-portrait");
     const headlineElement = byId("headline");
     const headlineFrame = byId("headline-frame");
     const subtitleElement = byId("subtitle");
@@ -503,6 +542,57 @@
     let supportingIndex = 0;
     let themeSwitchTimer = null;
     const speaker = byId("speaker-id");
+    const verseCard = byId("verse-card");
+    let verseTimers = [];
+    let lastVerseEventId = "";
+    function clearVerseTimers() { verseTimers.forEach(clearTimeout); verseTimers = []; }
+    function hideVerse(animate = true) {
+      clearVerseTimers();
+      if (!animate || !verseCard.classList.contains("is-holding") && !verseCard.classList.contains("is-entering")) {
+        verseCard.className = "verse-card";
+        return;
+      }
+      verseCard.className = "verse-card is-exiting";
+      verseTimers.push(setTimeout(() => { verseCard.className = "verse-card"; }, 720));
+    }
+    function playVerse(data, startedAt = Date.now(), textOnly = false) {
+      clearVerseTimers();
+      const age = Math.max(0, Date.now() - startedAt);
+      const enterMs = 850;
+      const stayMs = Number(data.verseStay || 10) * 1000;
+      const exitMs = 700;
+      if (!data.verseText || age >= enterMs + stayMs + exitMs) { verseCard.className = "verse-card"; return; }
+      const keepCard = textOnly && (verseCard.classList.contains("is-holding") || verseCard.classList.contains("is-entering"));
+      byId("verse-reference").textContent = data.verseReference || "";
+      const textElement = byId("verse-text");
+      textElement.textContent = data.verseText;
+      textElement.style.fontSize = data.verseText.length > 320 ? "24px" : data.verseText.length > 220 ? "28px" : "33px";
+      if (keepCard) {
+        verseCard.className = "verse-card is-holding is-text-changing";
+        verseTimers.push(setTimeout(() => verseCard.classList.remove("is-text-changing"), 450));
+        verseTimers.push(setTimeout(() => { verseCard.className = "verse-card is-exiting"; }, stayMs));
+        verseTimers.push(setTimeout(() => { verseCard.className = "verse-card"; }, stayMs + exitMs));
+        return;
+      }
+      verseCard.className = "verse-card";
+      verseCard.style.animationDelay = "";
+      void verseCard.offsetWidth;
+      if (age < enterMs) {
+        verseCard.classList.add("is-entering");
+        verseCard.style.animationDelay = `-${age}ms`;
+        verseTimers.push(setTimeout(() => { verseCard.className = "verse-card is-holding"; verseCard.style.animationDelay = ""; }, enterMs - age));
+      } else if (age < enterMs + stayMs) {
+        verseCard.classList.add("is-holding");
+      } else {
+        verseCard.classList.add("is-exiting");
+        verseCard.style.animationDelay = `-${age - enterMs - stayMs}ms`;
+      }
+      if (age < enterMs + stayMs) verseTimers.push(setTimeout(() => {
+        verseCard.className = "verse-card is-exiting";
+        verseCard.style.animationDelay = "";
+      }, enterMs + stayMs - age));
+      verseTimers.push(setTimeout(() => { verseCard.className = "verse-card"; verseCard.style.animationDelay = ""; }, enterMs + stayMs + exitMs - age));
+    }
     let speakerTimers = [];
     let lastSpeakerEventId = "";
     function clearSpeakerTimers() {
@@ -636,6 +726,10 @@
     }
     logo.onload = () => logoBox.classList.add("has-logo");
     logo.onerror = () => logoBox.classList.remove("has-logo");
+    churchLogo.onload = () => churchBrand.classList.add("has-logo");
+    churchLogo.onerror = () => churchBrand.classList.remove("has-logo");
+    pastorPortrait.onload = () => pastorPortrait.classList.add("has-image");
+    pastorPortrait.onerror = () => pastorPortrait.classList.remove("has-image");
     let formatter;
     function setClockFormatter() {
       const options = {
@@ -681,6 +775,8 @@
       config = { ...defaults, ...next };
       config.theme = ["news", "church", "podcast"].includes(config.theme) ? config.theme : "news";
       stage.dataset.theme = config.theme;
+      if (params.get("preview") === "1") document.body.style.background = config.theme === "church"
+        ? "#f8f8fb" : "linear-gradient(135deg, #32373d, #15171b 60%, #414449)";
       if (old.theme && old.theme !== config.theme) {
         clearTimeout(themeSwitchTimer);
         lowerThird.style.animation = "";
@@ -707,7 +803,7 @@
       root.style.setProperty("--corner-top", `${config.cornerTop}px`);
       root.style.setProperty("--corner-left", `${config.cornerLeft}px`);
       byId("label").textContent = config.label === "BREAKING NEWS" && config.theme !== "news"
-        ? (config.theme === "church" ? "CHURCH LIVE" : "PODCAST LIVE") : config.label;
+        ? (config.theme === "church" ? "MINISTERING" : "PODCAST LIVE") : config.label;
       document.querySelector(".ticker-lead").textContent = config.theme === "church" ? "SERVICE"
         : config.theme === "podcast" ? "ON THE MIC" : "LATEST";
       const linesChanged = JSON.stringify(old.supportingLines) !== JSON.stringify(config.supportingLines);
@@ -728,10 +824,18 @@
       ticker.classList.toggle("is-hidden", !config.showTicker);
       lowerThird.classList.toggle("no-ticker", !config.showTicker);
       logoBox.classList.toggle("is-hidden", !config.showLogo);
-      if (old.logo !== config.logo) {
+      churchBrand.classList.toggle("is-hidden", !config.showLogo);
+      if (old.logo !== config.logo || old.theme !== config.theme) {
         logoBox.classList.remove("has-logo");
+        churchBrand.classList.remove("has-logo");
         logo.removeAttribute("src");
-        if (config.logo) logo.src = config.logo;
+        churchLogo.removeAttribute("src");
+        if (config.logo) { logo.src = config.logo; churchLogo.src = config.logo; }
+      }
+      if (old.pastorImage !== config.pastorImage || old.theme !== config.theme) {
+        pastorPortrait.classList.remove("has-image");
+        pastorPortrait.removeAttribute("src");
+        if (config.pastorImage) pastorPortrait.src = config.pastorImage;
       }
       if (JSON.stringify(old.tickerItems) !== JSON.stringify(config.tickerItems)) buildTicker();
       if (old.tickerSeconds !== config.tickerSeconds) {
@@ -743,6 +847,12 @@
         lastSpeakerEventId = config.speakerEventId || "";
         if (lastSpeakerEventId) playSpeaker(config, Number(config.speakerStartedAt) || Date.now());
         else hideSpeaker();
+      }
+      if (config.verseEventId !== lastVerseEventId || old.theme !== config.theme) {
+        const textOnly = Boolean(lastVerseEventId) && config.theme === "church" && old.theme === config.theme;
+        lastVerseEventId = config.verseEventId || "";
+        if (config.theme === "church" && lastVerseEventId) playVerse(config, Number(config.verseStartedAt) || Date.now(), textOnly);
+        else hideVerse();
       }
     }
     // Force first render of logo, ticker, speed and clock formatter.
@@ -775,6 +885,8 @@
           applyState(event.data.state);
         } else if (event.origin === location.origin && event.data?.type === "speaker-preview") {
           playSpeaker(event.data.speaker);
+        } else if (event.origin === location.origin && event.data?.type === "verse-preview") {
+          playVerse(event.data.verse);
         }
       });
     } else if (location.protocol === "http:" || location.protocol === "https:") {
