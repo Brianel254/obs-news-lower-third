@@ -111,23 +111,41 @@
     .network-links { display:grid; gap:9px; margin-top:12px; }
     .network-links a { display:block; padding:9px 11px; border:1px solid #454d59; color:#dce9ff; background:#202833; font:13px/1.45 Consolas,monospace; overflow-wrap:anywhere; }
     .network-links a:hover { border-color:#8bb6ff; }
+    .speaker-grid { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+    .speaker-option { min-width:0; padding:12px; border:1px solid #4a4d56; background:#14171d; color:#f5f5f7; text-align:left; }
+    .speaker-option:hover { border-color:#b9bdc7; }
+    .speaker-option[aria-pressed="true"] { border-color:#f16b7b; box-shadow:inset 3px 0 #e11b33; background:#232027; }
+    .speaker-option > span:last-child { display:block; margin-top:10px; color:#b8bbc4; font-size:12px; font-weight:800; }
+    .speaker-art { display:flex; flex-direction:column; justify-content:flex-end; align-items:flex-start; height:80px; padding:10px; overflow:hidden; background:#31353d; }
+    .speaker-art b, .speaker-art i { display:block; max-width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; text-transform:uppercase; font-style:normal; line-height:1.05; }
+    .speaker-art b { font-size:17px; font-weight:900; }
+    .speaker-art i { font-size:9px; font-weight:900; letter-spacing:.03em; }
+    .speaker-option[data-speaker-template="1"] .speaker-art i { background:#fff; color:var(--red); padding:2px 5px; order:-1; }
+    .speaker-option[data-speaker-template="1"] .speaker-art b { background:var(--red); color:#fff; padding:3px 6px; }
+    .speaker-option[data-speaker-template="2"] .speaker-art i { background:var(--red); color:#fff; padding:2px 5px; order:-1; align-self:flex-end; }
+    .speaker-option[data-speaker-template="2"] .speaker-art b { background:#fff; color:var(--red); padding:3px 6px; }
+    .speaker-option[data-speaker-template="3"] .speaker-art b { background:#fff; color:#222; padding:3px 6px; }
+    .speaker-option[data-speaker-template="3"] .speaker-art i { background:#191b20; color:#fff; padding:3px 6px; border-left:3px solid var(--red); }
+    .speaker-option[data-speaker-template="4"] .speaker-art b { color:#fff; text-shadow:0 2px 4px #000; }
+    .speaker-option[data-speaker-template="4"] .speaker-art i { background:var(--red); color:#fff; padding:3px 6px; }
     @media (max-width:1000px) { .layout { grid-template-columns:1fr; } .preview-column { position:static; } }
     @media (max-width:650px) { .masthead { align-items:flex-start; flex-direction:column; } .two,.color-grid { grid-template-columns:1fr; } .card { padding:20px; } .desk-tabs button { min-width:0; padding:13px 6px; font-size:10px; letter-spacing:.04em; } .theme-card { grid-template-columns:88px minmax(0,1fr); gap:10px; } }
+    @media (max-width:420px) { .speaker-grid { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
   <header class="masthead">
     <div class="brand"><div class="brand-mark">N</div><div><div class="eyebrow">On-air graphics / Control 01</div><h1>Broadcast Desk</h1></div></div>
-    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button" href="/news-obs-dock.html" target="_blank" rel="noopener">Open OBS dock ↗</a><a class="button primary" href="/news-lower-third.html?v=20261025-1" target="_blank" rel="noopener">Open overlay ↗</a></div>
+    <div class="mast-actions"><div class="status" id="status"><i class="status-dot"></i><span>Connecting…</span></div><button class="button" id="copy-url" type="button">Copy OBS URL</button><a class="button" href="/news-obs-dock.html" target="_blank" rel="noopener">Open OBS dock ↗</a><a class="button primary" href="/news-lower-third.html?v=20261025-2" target="_blank" rel="noopener">Open overlay ↗</a></div>
   </header>
 
   <main class="layout">
     <section class="preview-column" aria-label="Live preview">
       <div class="section-heading"><h2>Output monitor</h2><div class="preview-toggle"><button type="button" data-preview="draft">Draft</button><button type="button" data-preview="live" class="active">Live output</button></div></div>
-      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261025-1" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261025-1" title="Draft lower-third preview"></iframe></div></div>
+      <div class="preview-shell"><div class="preview-stack"><iframe class="preview-frame" id="preview-live" src="/news-lower-third.html?preview=1&v=20261025-2" title="Live lower-third preview"></iframe><iframe class="preview-frame is-off" id="preview-draft" src="/news-lower-third.html?preview=1&draft=1&v=20261025-2" title="Draft lower-third preview"></iframe></div></div>
       <div class="on-air"><strong>ON AIR</strong><span id="on-air-headline">Connecting…</span><span class="on-air-detail" id="on-air-lines"></span></div>
       <div class="preview-foot"><span><strong>Preview your draft, then play it live.</strong><br>Keep the server window open during your broadcast.</span><span>Transparent in OBS<br>Dark backdrop here for preview</span></div>
-      <div class="url"><div class="url-label">OBS Browser Source URL</div><code id="obs-url"></code><p class="note">Set the source width to 1920 and height to 1080. Update this URL once in OBS to load the new supporting lines and ticker list.</p></div>
+      <div class="url"><div class="url-label">OBS Browser Source URL</div><code id="obs-url"></code><p class="note">Set the source width to 1920 and height to 1080. Use this updated URL in OBS to load the speaker motion graphic.</p></div>
       <div class="url"><div class="url-label">OBS Custom Browser Dock URL</div><code id="dock-url"></code><p class="note">Use this page as a compact control dock inside OBS.</p></div>
       <div class="url"><div class="url-label">Controls on other devices</div><div class="network-links" id="network-links"><span class="note">Finding this computer's local network address…</span></div><p class="note">Open a link on a phone or computer connected to the same trusted network. Anyone who can reach this address can operate the overlay; do not forward this port to the internet.</p></div>
     </section>
@@ -135,6 +153,7 @@
     <section class="controls" aria-label="Overlay controls">
       <div class="desk-tabs" role="tablist" aria-label="Control areas">
         <button type="button" id="stories-tab" role="tab" aria-controls="stories-panel" aria-selected="true">Stories</button>
+        <button type="button" id="speaker-tab" role="tab" aria-controls="speaker-panel" aria-selected="false">Speaker ID</button>
         <button type="button" id="theme-tab" role="tab" aria-controls="theme-panel" aria-selected="false">News themes</button>
         <button type="button" id="core-tab" role="tab" aria-controls="core-panel" aria-selected="false">Broadcast settings</button>
       </div>
@@ -157,6 +176,25 @@
         <label class="field"><span>Change supporting line every</span><select id="supporting-interval"><option value="5">5 seconds</option><option value="7">7 seconds</option><option value="10">10 seconds</option></select></label>
       </div>
 
+      </div>
+      <div class="tab-panel" id="speaker-panel" role="tabpanel" aria-labelledby="speaker-tab" hidden>
+        <p class="section-intro">Put a speaker name on screen above the current headline. Each Play runs a complete entrance, hold and exit. The last speaker settings are saved when you play.</p>
+        <div class="card"><h2>Speaker identification</h2>
+          <label class="field"><span>Speaker name</span><input id="speaker-name-input" type="text" maxlength="100" placeholder="e.g. Simon Daniel" autocomplete="off"></label>
+          <label class="field"><span>Role or title</span><input id="speaker-title-input" type="text" maxlength="100" placeholder="e.g. Motion Graphics Designer" autocomplete="off"></label>
+          <div class="two">
+            <label class="field"><span>Screen side</span><select id="speaker-side"><option value="left">Left</option><option value="right">Right</option></select></label>
+            <label class="field"><span>Time on screen</span><select id="speaker-stay"><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option></select></label>
+          </div>
+          <div class="field"><span>Template · uses live theme color</span><div class="speaker-grid" role="group" aria-label="Speaker graphic templates">
+            <button type="button" class="speaker-option" data-speaker-template="1" aria-pressed="true"><span class="speaker-art"><b>Simon Daniel</b><i>Motion Graphics Designer</i></span><span>01 / Solid name bar</span></button>
+            <button type="button" class="speaker-option" data-speaker-template="2" aria-pressed="false"><span class="speaker-art"><b>Ethan Wilson</b><i>Creative Director</i></span><span>02 / Floating title tag</span></button>
+            <button type="button" class="speaker-option" data-speaker-template="3" aria-pressed="false"><span class="speaker-art"><b>James Hoover</b><i>Motion Director</i></span><span>03 / White name plate</span></button>
+            <button type="button" class="speaker-option" data-speaker-template="4" aria-pressed="false"><span class="speaker-art"><b>Harry Stafford</b><i>Contributing Journalist</i></span><span>04 / Open name and strap</span></button>
+          </div></div>
+          <div class="action-row"><button class="button" id="preview-speaker" type="button">Preview animation</button><button class="button primary" id="play-speaker" type="button">▶ Play live</button><button class="button" id="hide-speaker" type="button">Take off air</button></div>
+          <p class="note">The chosen time starts after the entrance finishes. Press Play again to run the same speaker from the beginning.</p>
+        </div>
       </div>
       <div class="tab-panel" id="theme-panel" role="tabpanel" aria-labelledby="theme-tab" hidden>
         <p class="section-intro">Choose a complete look for the live graphic. News keeps the current design; Church uses a warm serif layout; Podcast uses a dark studio layout. Your saved stories stay intact.</p>
@@ -232,7 +270,7 @@
 
   <script>
     const serviceOrigin = location.protocol === "file:" ? "http://127.0.0.1:8080" : location.origin;
-    const obsUrl = new URL("/news-lower-third.html?v=20261025-1", serviceOrigin).href;
+    const obsUrl = new URL("/news-lower-third.html?v=20261025-2", serviceOrigin).href;
     document.getElementById("obs-url").textContent = obsUrl;
     document.getElementById("dock-url").textContent = new URL("/news-obs-dock.html", serviceOrigin).href;
     const status = document.getElementById("status");
@@ -248,6 +286,8 @@
     let actionChain = Promise.resolve();
     let liveState = {};
     let coreDirty = false;
+    let speakerDirty = false;
+    let speakerTemplate = 1;
     let activeTab = "stories";
     function setStatus(message, kind = "") {
       status.className = `status ${kind}`;
@@ -358,10 +398,33 @@
       values.tickerItems = parseTickerItems();
       return values;
     }
+    function collectSpeaker() {
+      return {
+        speakerName: document.getElementById("speaker-name-input").value.trim(),
+        speakerTitle: document.getElementById("speaker-title-input").value.trim(),
+        speakerTemplate,
+        speakerSide: document.getElementById("speaker-side").value,
+        speakerStay: Number(document.getElementById("speaker-stay").value)
+      };
+    }
+    function fillSpeaker(state) {
+      document.getElementById("speaker-name-input").value = state.speakerName || "";
+      document.getElementById("speaker-title-input").value = state.speakerTitle || "";
+      document.getElementById("speaker-side").value = state.speakerSide || "left";
+      document.getElementById("speaker-stay").value = String(state.speakerStay || 4);
+      speakerTemplate = Number(state.speakerTemplate) || 1;
+      updateSpeakerCards();
+    }
+    function updateSpeakerCards() {
+      for (const button of document.querySelectorAll("[data-speaker-template]")) {
+        button.setAttribute("aria-pressed", String(Number(button.dataset.speakerTemplate) === speakerTemplate));
+      }
+    }
     function updateDraftPreview() {
       if (draftFrame.contentWindow) {
-        const draft = activeTab !== "stories" ? { ...liveState, ...collectCore() }
-          : { ...liveState, ...collectStory() };
+        const draft = activeTab === "stories" ? { ...liveState, ...collectStory() }
+          : activeTab === "speaker" ? { ...liveState, speakerEventId: "" }
+          : { ...liveState, ...collectCore() };
         draftFrame.contentWindow.postMessage({ type: "draft-state", state: draft }, serviceOrigin);
       }
     }
@@ -395,18 +458,35 @@
     document.getElementById("supporting-interval").addEventListener("change", () => markDraft("story"));
     document.getElementById("ticker-input").addEventListener("input", () => markDraft("core"));
     document.getElementById("add-supporting").addEventListener("click", () => { addSupportingRow(); markDraft("story"); });
+    for (const id of ["speaker-name-input", "speaker-title-input", "speaker-side", "speaker-stay"]) {
+      document.getElementById(id).addEventListener("input", () => {
+        speakerDirty = true;
+        if (ready) setStatus("Speaker draft ready · preview or play live", "ok");
+      });
+    }
+    for (const button of document.querySelectorAll("[data-speaker-template]")) {
+      button.addEventListener("click", () => {
+        speakerTemplate = Number(button.dataset.speakerTemplate);
+        speakerDirty = true;
+        updateSpeakerCards();
+        if (ready) setStatus("Speaker template selected · preview or play live", "ok");
+      });
+    }
     function showTab(name) {
       activeTab = name;
       document.getElementById("stories-panel").hidden = name !== "stories";
+      document.getElementById("speaker-panel").hidden = name !== "speaker";
       document.getElementById("theme-panel").hidden = name !== "theme";
       document.getElementById("core-panel").hidden = name !== "core";
       document.getElementById("stories-tab").setAttribute("aria-selected", String(name === "stories"));
+      document.getElementById("speaker-tab").setAttribute("aria-selected", String(name === "speaker"));
       document.getElementById("theme-tab").setAttribute("aria-selected", String(name === "theme"));
       document.getElementById("core-tab").setAttribute("aria-selected", String(name === "core"));
       updateDraftPreview();
       showPreview("draft");
     }
     document.getElementById("stories-tab").addEventListener("click", () => showTab("stories"));
+    document.getElementById("speaker-tab").addEventListener("click", () => showTab("speaker"));
     document.getElementById("theme-tab").addEventListener("click", () => showTab("theme"));
     document.getElementById("core-tab").addEventListener("click", () => showTab("core"));
     const themePalettes = {
@@ -458,6 +538,7 @@
         ? `${lineCount} supporting lines · rotating every ${state.supportingInterval || 7} seconds`
         : `${lineCount} supporting line${lineCount === 1 ? "" : "s"} · add at least 2 to rotate`;
       if (!coreDirty) fillCore(state);
+      if (!speakerDirty) fillSpeaker(state);
       renderCues();
     }
     function pushLivePreview(state) {
@@ -568,6 +649,38 @@
     }
     document.getElementById("save-core").addEventListener("click", () => saveSharedSettings());
     document.getElementById("save-theme").addEventListener("click", () => saveSharedSettings(true));
+    document.getElementById("preview-speaker").addEventListener("click", () => {
+      const speaker = collectSpeaker();
+      if (!speaker.speakerName) { setStatus("Enter a speaker name to preview", "error"); return; }
+      updateDraftPreview();
+      showPreview("draft");
+      draftFrame.contentWindow?.postMessage({ type: "speaker-preview", speaker }, serviceOrigin);
+      setStatus("Previewing speaker animation · not live", "ok");
+    });
+    document.getElementById("play-speaker").addEventListener("click", () => {
+      if (!ready) return;
+      const speaker = collectSpeaker();
+      if (!speaker.speakerName) { setStatus("Enter a speaker name", "error"); return; }
+      showPreview("live");
+      setStatus("Sending speaker live…");
+      runAction(async () => {
+        const state = await api("/api/speaker/play", speaker);
+        speakerDirty = false;
+        showLiveState(state);
+        pushLivePreview(state);
+        setStatus(`Speaker live · ${speaker.speakerStay} second hold`, "ok");
+      });
+    });
+    document.getElementById("hide-speaker").addEventListener("click", () => {
+      if (!ready) return;
+      runAction(async () => {
+        const state = await api("/api/speaker/hide", {});
+        showLiveState(state);
+        pushLivePreview(state);
+        showPreview("live");
+        setStatus("Speaker graphic leaving the screen", "ok");
+      });
+    });
     document.getElementById("take-draft-live").addEventListener("click", () => {
       if (!ready) return;
       const settings = collectStory();
@@ -608,6 +721,7 @@
         liveState = state;
         fillCore(state);
         fillStory(state);
+        fillSpeaker(state);
         showLiveState(state);
         ready = true;
         setStatus("Connected · ready", "ok");

@@ -80,6 +80,23 @@ class OverlaySeparationTest(unittest.TestCase):
                 with self.assertRaises(HTTPError) as invalid:
                     post("/api/core", {"theme": "unlisted"})
                 self.assertEqual(invalid.exception.code, 400)
+                speaker = {"speakerName": "Simon Daniel", "speakerTitle": "Motion Graphics Designer",
+                           "speakerTemplate": 2, "speakerSide": "right", "speakerStay": 4}
+                played = post("/api/speaker/play", speaker)
+                self.assertEqual(played["speakerName"], "Simon Daniel")
+                self.assertEqual(played["speakerTemplate"], 2)
+                self.assertGreater(played["speakerStartedAt"], 0)
+                self.assertEqual(played["storyRevision"], replayed["storyRevision"])
+                self.assertEqual(played["activeCueId"], saved["cue"]["id"])
+                played_again = post("/api/speaker/play", speaker)
+                self.assertNotEqual(played_again["speakerEventId"], played["speakerEventId"])
+                self.assertEqual(module.load_state()["speakerName"], "Simon Daniel")
+                with self.assertRaises(HTTPError) as invalid:
+                    post("/api/speaker/play", {**speaker, "speakerStay": 11})
+                self.assertEqual(invalid.exception.code, 400)
+                hidden_speaker = post("/api/speaker/hide", {})
+                self.assertEqual(hidden_speaker["speakerEventId"], "")
+                self.assertEqual(hidden_speaker["speakerName"], "Simon Daniel")
             finally:
                 server.shutdown()
                 server.server_close()

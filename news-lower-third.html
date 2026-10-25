@@ -106,6 +106,45 @@
       filter: drop-shadow(0 8px 14px rgba(0,0,0,.48));
       animation: panel-in .9s cubic-bezier(.17,.76,.22,1) both;
     }
+    .speaker-id {
+      position: absolute;
+      bottom: calc(var(--bottom-offset) + 225px);
+      width: max-content;
+      max-width: 850px;
+      min-width: 360px;
+      opacity: 0;
+      visibility: hidden;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,.55));
+      --speaker-travel: -130px;
+    }
+    .speaker-id[data-side="left"] { left: var(--side-inset); text-align: left; }
+    .speaker-id[data-side="right"] { right: var(--side-inset); text-align: right; --speaker-travel: 130px; }
+    .speaker-id.is-entering, .speaker-id.is-holding, .speaker-id.is-exiting { visibility: visible; }
+    .speaker-id.is-entering { animation: speaker-in .8s cubic-bezier(.16,.8,.2,1) both; }
+    .speaker-id.is-holding { opacity: 1; }
+    .speaker-id.is-exiting { animation: speaker-out .65s cubic-bezier(.55,.05,.68,.19) both; }
+    .speaker-name, .speaker-title { display: block; width: fit-content; max-width: 850px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; line-height: 1; }
+    .speaker-id[data-side="right"] .speaker-name, .speaker-id[data-side="right"] .speaker-title { margin-left: auto; }
+    .speaker-name { font-size: 43px; font-weight: 900; letter-spacing: -.025em; }
+    .speaker-title { font-size: 20px; font-weight: 900; letter-spacing: .045em; }
+    .speaker-id:not(.has-title) .speaker-title { display: none; }
+    .speaker-id[data-template="1"] .speaker-title { background: #fff; color: var(--accent-dark); padding: 4px 10px 3px; font-size: 18px; }
+    .speaker-id[data-template="1"] .speaker-name { background: var(--accent); color: #fff; padding: 5px 14px 6px; min-width: 400px; }
+    .speaker-id[data-template="2"] .speaker-title { background: var(--accent); color: #fff; padding: 4px 10px 3px; margin-left: auto; margin-right: 13px; font-size: 17px; }
+    .speaker-id[data-template="2"] .speaker-name { background: #fff; color: var(--accent-dark); padding: 6px 13px 7px; border-left: 5px solid var(--accent); }
+    .speaker-id[data-template="2"][data-side="right"] .speaker-title { margin-right: 0; }
+    .speaker-id[data-template="3"] .speaker-name { background: #fff; color: #17191e; padding: 6px 15px 7px; border-top: 4px solid var(--accent); }
+    .speaker-id[data-template="3"] .speaker-title { background: rgba(16,18,23,.94); color: #fff; padding: 6px 12px 5px; font-size: 17px; border-left: 4px solid var(--accent); }
+    .speaker-id[data-template="4"] .speaker-name { color: #fff; padding: 3px 5px 4px; text-shadow: 0 2px 5px #000, 0 0 15px #000; }
+    .speaker-id[data-template="4"] .speaker-title { background: var(--accent); color: #fff; padding: 5px 12px 4px; font-size: 18px; }
+    .speaker-id.is-entering .speaker-title { animation: speaker-strip-in .55s .17s cubic-bezier(.16,.8,.2,1) both; }
+    .speaker-id.is-entering .speaker-name { animation: speaker-strip-in .58s .28s cubic-bezier(.16,.8,.2,1) both; }
+    .speaker-id.is-exiting .speaker-title { animation: speaker-strip-out .5s .02s ease-in both; }
+    .speaker-id.is-exiting .speaker-name { animation: speaker-strip-out .5s .1s ease-in both; }
+    @keyframes speaker-in { from { opacity: 0; transform: translateX(var(--speaker-travel)) scale(.96); } to { opacity: 1; transform: translateX(0) scale(1); } }
+    @keyframes speaker-out { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(var(--speaker-travel)); } }
+    @keyframes speaker-strip-in { from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(15px); } to { opacity: 1; clip-path: inset(0 0 0 0); transform: translateY(0); } }
+    @keyframes speaker-strip-out { from { opacity: 1; clip-path: inset(0 0 0 0); } to { opacity: 0; clip-path: inset(0 100% 0 0); } }
     .top-rule {
       position: absolute;
       left: 0;
@@ -369,6 +408,11 @@
       <div class="clock-row"><div class="clock" id="clock">00:00:00</div><div class="clock-zone" id="clock-zone">EAT</div></div>
     </div>
 
+    <div class="speaker-id" id="speaker-id" data-template="1" data-side="left" aria-label="Speaker identification">
+      <div class="speaker-title" id="speaker-title"></div>
+      <div class="speaker-name" id="speaker-name"></div>
+    </div>
+
     <div class="lower-third">
       <div class="top-rule"></div>
       <div class="breaking-label" id="label">BREAKING NEWS</div>
@@ -423,7 +467,9 @@
       bottomOffset: 54,
       sideInset: 48,
       cornerTop: 42,
-      cornerLeft: 48
+      cornerLeft: 48,
+      speakerName: "", speakerTitle: "", speakerTemplate: 1, speakerSide: "left",
+      speakerStay: 4, speakerEventId: "", speakerStartedAt: 0
     };
     let config = { ...defaults };
     const params = new URLSearchParams(location.search);
@@ -456,6 +502,59 @@
     let supportingRotationTimer = null;
     let supportingIndex = 0;
     let themeSwitchTimer = null;
+    const speaker = byId("speaker-id");
+    let speakerTimers = [];
+    let lastSpeakerEventId = "";
+    function clearSpeakerTimers() {
+      speakerTimers.forEach(clearTimeout);
+      speakerTimers = [];
+    }
+    function hideSpeaker(animate = true) {
+      clearSpeakerTimers();
+      if (!animate || !speaker.classList.contains("is-holding") && !speaker.classList.contains("is-entering")) {
+        speaker.className = "speaker-id";
+        return;
+      }
+      speaker.className = "speaker-id is-exiting";
+      speakerTimers.push(setTimeout(() => { speaker.className = "speaker-id"; }, 670));
+    }
+    function playSpeaker(data, startedAt = Date.now()) {
+      clearSpeakerTimers();
+      const age = Math.max(0, Date.now() - startedAt);
+      const enterMs = 800;
+      const stayMs = Number(data.speakerStay || 4) * 1000;
+      const exitMs = 650;
+      if (!data.speakerName || age >= enterMs + stayMs + exitMs) {
+        speaker.className = "speaker-id";
+        return;
+      }
+      byId("speaker-name").textContent = data.speakerName;
+      byId("speaker-title").textContent = data.speakerTitle || "";
+      speaker.className = "speaker-id";
+      speaker.style.animationDelay = "";
+      speaker.classList.toggle("has-title", Boolean(data.speakerTitle));
+      speaker.dataset.template = String(data.speakerTemplate || 1);
+      speaker.dataset.side = data.speakerSide === "right" ? "right" : "left";
+      void speaker.offsetWidth;
+      if (age < enterMs) {
+        speaker.classList.add("is-entering");
+        speaker.style.animationDelay = `-${age}ms`;
+        speakerTimers.push(setTimeout(() => {
+          speaker.className = `speaker-id${data.speakerTitle ? " has-title" : ""} is-holding`;
+          speaker.style.animationDelay = "";
+        }, enterMs - age));
+      } else if (age < enterMs + stayMs) {
+        speaker.classList.add("is-holding");
+      } else {
+        speaker.classList.add("is-exiting");
+        speaker.style.animationDelay = `-${age - enterMs - stayMs}ms`;
+      }
+      if (age < enterMs + stayMs) speakerTimers.push(setTimeout(() => {
+        speaker.className = `speaker-id${data.speakerTitle ? " has-title" : ""} is-exiting`;
+        speaker.style.animationDelay = "";
+      }, enterMs + stayMs - age));
+      speakerTimers.push(setTimeout(() => { speaker.className = "speaker-id"; speaker.style.animationDelay = ""; }, enterMs + stayMs + exitMs - age));
+    }
     function clearSupportingFlip() {
       clearTimeout(supportFlipTimer);
       if (supportFlipGhost) supportFlipGhost.remove();
@@ -640,6 +739,11 @@
       }
       if (old.timeZone !== config.timeZone || old.showSeconds !== config.showSeconds) setClockFormatter();
       updateClock();
+      if (config.speakerEventId !== lastSpeakerEventId) {
+        lastSpeakerEventId = config.speakerEventId || "";
+        if (lastSpeakerEventId) playSpeaker(config, Number(config.speakerStartedAt) || Date.now());
+        else hideSpeaker();
+      }
     }
     // Force first render of logo, ticker, speed and clock formatter.
     const initial = config;
@@ -669,6 +773,8 @@
       addEventListener("message", event => {
         if (event.origin === location.origin && event.data?.type === "draft-state") {
           applyState(event.data.state);
+        } else if (event.origin === location.origin && event.data?.type === "speaker-preview") {
+          playSpeaker(event.data.speaker);
         }
       });
     } else if (location.protocol === "http:" || location.protocol === "https:") {

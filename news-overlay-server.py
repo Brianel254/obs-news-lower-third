@@ -9,6 +9,7 @@ import os
 import re
 import socket
 import threading
+import time
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -61,10 +62,18 @@ DEFAULTS = {
     "revision": 1,
     "storyRevision": 1,
     "activeCueId": "",
+    "speakerName": "",
+    "speakerTitle": "",
+    "speakerTemplate": 1,
+    "speakerSide": "left",
+    "speakerStay": 4,
+    "speakerEventId": "",
+    "speakerStartedAt": 0,
 }
 
 STORY_KEYS = {"label", "headline", "supportingLines", "supportingInterval"}
-CORE_KEYS = set(DEFAULTS) - STORY_KEYS - {"subtitle", "ticker", "revision", "storyRevision", "activeCueId", "logoMime"}
+SPEAKER_KEYS = {"speakerName", "speakerTitle", "speakerTemplate", "speakerSide", "speakerStay"}
+CORE_KEYS = set(DEFAULTS) - STORY_KEYS - SPEAKER_KEYS - {"subtitle", "ticker", "revision", "storyRevision", "activeCueId", "logoMime", "speakerEventId", "speakerStartedAt"}
 
 TEXT_LIMITS = {
     "label": 48,
@@ -92,6 +101,22 @@ NUMBERS = {
 
 
 def checked_value(key: str, value: object) -> object:
+    if key in {"speakerName", "speakerTitle"}:
+        if not isinstance(value, str) or len(value) > 100:
+            raise ValueError(f"Invalid {key} (100 characters maximum)")
+        return value.strip()
+    if key == "speakerTemplate":
+        if type(value) is not int or value not in {1, 2, 3, 4}:
+            raise ValueError("Choose one of four speaker templates")
+        return value
+    if key == "speakerSide":
+        if value not in {"left", "right"}:
+            raise ValueError("Speaker position must be left or right")
+        return value
+    if key == "speakerStay":
+        if type(value) is not int or not 4 <= value <= 10:
+            raise ValueError("Speaker stay time must be 4 to 10 seconds")
+        return value
     if key == "theme":
         if value not in {"news", "church", "podcast"}:
             raise ValueError("Theme must be news, church or podcast")
@@ -138,8 +163,12 @@ def load_state() -> dict:
         try:
             saved = json.loads(STATE_FILE.read_text(encoding="utf-8"))
             for key, value in saved.items():
-                if key in DEFAULTS and key not in {"revision", "storyRevision", "logoMime", "activeCueId"}:
+                if key in DEFAULTS and key not in {"revision", "storyRevision", "logoMime", "activeCueId", "speakerEventId", "speakerStartedAt"}:
                     state[key] = checked_value(key, value)
+            if isinstance(saved.get("speakerEventId"), str) and re.fullmatch(r"[0-9a-f]{32}|", saved["speakerEventId"]):
+                state["speakerEventId"] = saved["speakerEventId"]
+            if type(saved.get("speakerStartedAt")) is int and saved["speakerStartedAt"] >= 0:
+                state["speakerStartedAt"] = saved["speakerStartedAt"]
             if saved.get("logoMime") in {"image/png", "image/jpeg", "image/webp"}:
                 state["logoMime"] = saved["logoMime"]
             if isinstance(saved.get("revision"), int):
@@ -318,7 +347,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"error": "Local requests only"}, 403)
             return
         path = urlsplit(self.path).path
-        if path not in {"/api/state", "/api/core", "/api/logo", "/api/cues/save", "/api/cues/delete", "/api/activate"}:
+        if path not in {"/api/state", "/api/core", "/api/logo", "/api/cues/save", "/api/cues/delete", "/api/activate", "/api/speaker/play", "/api/speaker/hide"}:
             self.send_json({"error": "Not found"}, 404)
             return
         try:
@@ -342,6 +371,25 @@ class Handler(BaseHTTPRequestHandler):
                 changes = checked_core(json.loads(body))
                 with LOCK:
                     next_state = with_legacy_copy({**STATE, **changes, "revision": STATE["revision"] + 1})
+                    save_state(next_state)
+                    STATE = next_state
+                    answer = STATE.copy()
+            elif path == "/api/speaker/play":
+                incoming = json.loads(body)
+                if not isinstance(incoming, dict):
+                    raise ValueError("Speaker settings must be an object")
+                changes = {key: checked_value(key, incoming[key]) for key in SPEAKER_KEYS if key in incoming}
+                if set(changes) != SPEAKER_KEYS or not changes["speakerName"]:
+                    raise ValueError("Enter a speaker name and choose all speaker settings")
+                with LOCK:
+                    next_state = {**STATE, **changes, "speakerEventId": uuid4().hex,
+                                  "speakerStartedAt": int(time.time() * 1000), "revision": STATE["revision"] + 1}
+                    save_state(next_state)
+                    STATE = next_state
+                    answer = STATE.copy()
+            elif path == "/api/speaker/hide":
+                with LOCK:
+                    next_state = {**STATE, "speakerEventId": "", "revision": STATE["revision"] + 1}
                     save_state(next_state)
                     STATE = next_state
                     answer = STATE.copy()
