@@ -398,6 +398,7 @@ class Handler(BaseHTTPRequestHandler):
             "/news-lower-third.html": (ROOT / "news-lower-third.html", "text/html; charset=utf-8"),
             "/news-controls.html": (ROOT / "news-controls.html", "text/html; charset=utf-8"),
             "/news-obs-dock.html": (ROOT / "news-obs-dock.html", "text/html; charset=utf-8"),
+            "/news-obs-utility-dock.html": (ROOT / "news-obs-utility-dock.html", "text/html; charset=utf-8"),
             "/logo.png": (ROOT / "logo.png", "image/png"),
         }
         if path == "/media/logo":

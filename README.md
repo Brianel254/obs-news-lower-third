@@ -15,6 +15,12 @@ Keep the server running during the broadcast. Open the control page at `http://1
 1. **Overlay:** Add the **OBS Browser Source URL** as a Browser Source in your scene. Set its width to **1920** and height to **1080**. This is the transparent lower-third graphic viewers see. On port 8080, the URL is `http://127.0.0.1:8080/news-lower-third.html?v=20261025-3`.
 2. **Controls:** Add the **OBS Custom Browser Dock URL** as a Custom Browser Dock in OBS. This is the compact panel for editing and playing saved headlines; it does not appear in the video. On port 8080, the URL is `http://127.0.0.1:8080/news-obs-dock.html`.
 
+For focused controls, OBS can also use these Custom Browser Dock URLs:
+
+- **Verse dock:** `http://127.0.0.1:8080/news-obs-utility-dock.html?mode=verse`
+- **Speaker ID dock:** `http://127.0.0.1:8080/news-obs-utility-dock.html?mode=speaker`
+- **Theme dock:** `http://127.0.0.1:8080/news-obs-utility-dock.html?mode=themes`
+
 The dock's top bar shows the live headline, a green dot when the overlay is on air, and an eye icon for visibility. Click a cue row to expand and edit its name, label, headline, supporting lines and rotation interval. **Save** keeps the edits in the cue; the separate Play icon takes it live. Playing a cue with unsaved edits saves them first. Hover or focus on an icon to see its label. Use the gear icon to open the full control page.
 
 ## Use

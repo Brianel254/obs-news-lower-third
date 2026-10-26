@@ -157,6 +157,7 @@
       <div class="preview-foot"><span><strong>Preview your draft, then play it live.</strong><br>Keep the server window open during your broadcast.</span><span>Transparent in OBS<br>Dark backdrop here for preview</span></div>
       <div class="url"><div class="url-label">OBS Browser Source URL</div><code id="obs-url"></code><p class="note">Set the source width to 1920 and height to 1080. Use this updated URL in OBS to load the speaker motion graphic.</p></div>
       <div class="url"><div class="url-label">OBS Custom Browser Dock URL</div><code id="dock-url"></code><p class="note">Use this page as a compact control dock inside OBS.</p></div>
+      <div class="url"><div class="url-label">Focused OBS docks</div><code id="verse-dock-url"></code><code id="speaker-dock-url"></code><code id="theme-dock-url"></code><p class="note">Add any of these as OBS Custom Browser Docks for compact Verse, Speaker ID, or Theme controls.</p></div>
       <div class="url"><div class="url-label">Controls on other devices</div><div class="network-links" id="network-links"><span class="note">Finding this computer's local network address…</span></div><p class="note">Open a link on a phone or computer connected to the same trusted network. Anyone who can reach this address can operate the overlay; do not forward this port to the internet.</p></div>
     </section>
 
@@ -296,6 +297,9 @@
     const obsUrl = new URL("/news-lower-third.html?v=20261025-3", serviceOrigin).href;
     document.getElementById("obs-url").textContent = obsUrl;
     document.getElementById("dock-url").textContent = new URL("/news-obs-dock.html", serviceOrigin).href;
+    document.getElementById("verse-dock-url").textContent = new URL("/news-obs-utility-dock.html?mode=verse", serviceOrigin).href;
+    document.getElementById("speaker-dock-url").textContent = new URL("/news-obs-utility-dock.html?mode=speaker", serviceOrigin).href;
+    document.getElementById("theme-dock-url").textContent = new URL("/news-obs-utility-dock.html?mode=themes", serviceOrigin).href;
     const status = document.getElementById("status");
     const storyFields = [...document.querySelectorAll("[data-story]")];
     const coreFields = [...document.querySelectorAll("[data-core]")];
